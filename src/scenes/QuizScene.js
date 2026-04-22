@@ -100,6 +100,16 @@ export class QuizScene extends Scene {
         this.defenseInstructionText = this.add.bitmapText(W / 2, H * 0.57, "pixelfont", "REPONDS POUR BLOQUER", 14)
             .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
 
+        // Defense timer bar (above defensePanel)
+        const timerBarY = H * 0.32;
+        const timerBarW = W * 0.4;
+        this.defenseTimerBg = this.add.rectangle(W / 2, timerBarY, timerBarW, 10, 0x333333)
+            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+        this.defenseTimerBar = this.add.rectangle(W / 2 - timerBarW / 2, timerBarY, timerBarW, 10, 0xff8800)
+            .setOrigin(0, 0.5).setDepth(7).setAlpha(0);
+        this.defenseTimerText = this.add.bitmapText(W / 2, timerBarY - 14, "pixelfont", "4", 18)
+            .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0).setTint(0xff8800);
+
         // Keyboard
         this.input.keyboard.on('keydown', this.handleKeyInput, this);
 
@@ -148,6 +158,17 @@ export class QuizScene extends Scene {
         }
         if (this.defenseAnswerText) this.defenseAnswerText.setPosition(gameSize.width / 2, gameSize.height * 0.48);
         if (this.defenseInstructionText) this.defenseInstructionText.setPosition(gameSize.width / 2, gameSize.height * 0.57);
+
+        const timerBarY = gameSize.height * 0.32;
+        const timerBarW = gameSize.width * 0.4;
+        if (this.defenseTimerBg) {
+            this.defenseTimerBg.setPosition(gameSize.width / 2, timerBarY);
+            this.defenseTimerBg.setDisplaySize(timerBarW, 10);
+        }
+        if (this.defenseTimerBar) {
+            this.defenseTimerBar.setPosition(gameSize.width / 2 - timerBarW / 2, timerBarY);
+        }
+        if (this.defenseTimerText) this.defenseTimerText.setPosition(gameSize.width / 2, timerBarY - 14);
     }
 
     // ---- HP BAR SYSTEM ----
@@ -435,6 +456,41 @@ export class QuizScene extends Scene {
         this.defenseAnswerBox.setAlpha(1);
         this.defenseAnswerText.setText("_").setAlpha(1);
         this.defenseInstructionText.setAlpha(1);
+
+        // Show and start the 4-second countdown timer
+        const DEFENSE_DURATION = 4000;
+        const timerBarW = this.screenW * 0.4;
+        this.defenseTimerBar.setDisplaySize(timerBarW, 10);
+        this.defenseTimerBg.setAlpha(1);
+        this.defenseTimerBar.setAlpha(1);
+        this.defenseTimerText.setText("4").setAlpha(1);
+
+        this.defenseBarTween = this.tweens.add({
+            targets: this.defenseTimerBar,
+            displayWidth: 0,
+            duration: DEFENSE_DURATION,
+            ease: 'Linear',
+            onUpdate: () => {
+                if (!this.defenseTimer) return;
+                const remaining = Math.ceil(this.defenseTimer.getRemainingSeconds());
+                this.defenseTimerText.setText(String(remaining));
+                // Color shift: orange → red as time runs out
+                const ratio = this.defenseTimer.getProgress();
+                this.defenseTimerBar.setFillStyle(ratio > 0.6 ? 0xff8800 : 0xff3300);
+                this.defenseTimerText.setTint(ratio > 0.6 ? 0xff8800 : 0xff3300);
+            }
+        });
+
+        this.defenseTimer = this.time.addEvent({
+            delay: DEFENSE_DURATION,
+            callback: () => {
+                if (!this.isDefensePhase) return;
+                this.playerDefended = false;
+                // Show "too slow" feedback before closing
+                this.showFloatingDamage("TROP LENT!", this.screenW / 2, this.screenH * 0.35, 0xff6600);
+                this.time.delayedCall(200, () => this.endDefensePhase(this.damageToBlock));
+            }
+        });
     }
 
     submitDefenseAnswer() {
@@ -459,12 +515,25 @@ export class QuizScene extends Scene {
     endDefensePhase(damageToBlock) {
         this.isDefensePhase = false;
 
+        // Cancel countdown timer and bar tween if still running
+        if (this.defenseTimer) {
+            this.defenseTimer.remove();
+            this.defenseTimer = null;
+        }
+        if (this.defenseBarTween) {
+            this.defenseBarTween.stop();
+            this.defenseBarTween = null;
+        }
+
         // Hide defense UI
         this.defensePanel.setAlpha(0);
         this.defenseQuestionText.setAlpha(0);
         this.defenseAnswerBox.setAlpha(0);
         this.defenseAnswerText.setAlpha(0);
         this.defenseInstructionText.setAlpha(0);
+        this.defenseTimerBg.setAlpha(0);
+        this.defenseTimerBar.setAlpha(0);
+        this.defenseTimerText.setAlpha(0);
 
         let actualDamage = damageToBlock;
         let feedbackText = '';
