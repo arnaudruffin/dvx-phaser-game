@@ -24,12 +24,11 @@ export class QuizScene extends Scene {
         this.lastAnswerCorrect = true;
         this.state = 'intro';
 
-        // Defense timing variables
+        // Defense phase variables (math-based)
         this.isDefensePhase = false;
         this.playerDefended = false;
-        this.defenseStartTime = 0;
-        this.defenseDuration = 600; // ms
-        this.defenseKeyPressed = false;
+        this.defenseAnswer = "";
+        this.defenseQuestion = null;
     }
 
     create() {
@@ -84,35 +83,21 @@ export class QuizScene extends Scene {
         this.feedbackText = this.add.bitmapText(W / 2, H - 30, "pixelfont", "", 20)
             .setOrigin(0.5, 0.5).setDepth(10).setAlpha(0);
 
-        // --- Defense timing UI (hidden by default) ---
-        this.defenseText = this.add.bitmapText(W / 2, H * 0.25, "pixelfont", "DEFEND!", 48)
-            .setOrigin(0.5, 0.5).setDepth(8).setAlpha(0);
+        // --- Defense quiz UI (hidden by default) ---
+        this.defensePanel = this.add.rectangle(W / 2, H * 0.45, W * 0.6, H * 0.25, 0x2d2d44)
+            .setStrokeStyle(3, 0xff6666).setDepth(5).setAlpha(0);
+
+        this.defenseQuestionText = this.add.bitmapText(W / 2, H * 0.38, "pixelfont", "", 24)
+            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+
+        this.defenseAnswerBox = this.add.rectangle(W / 2, H * 0.48, W * 0.25, H * 0.08, 0x1a1a2e)
+            .setStrokeStyle(2, 0xff6666).setDepth(6).setAlpha(0);
         
-        // Timing bar dimensions
-        this.timingBarWidth = 300;
-        this.timingBarHeight = 30;
-        
-        // Timing bar background
-        this.timingBarBg = this.add.rectangle(W / 2, H * 0.35, this.timingBarWidth, this.timingBarHeight, 0x333333)
-            .setOrigin(0.5, 0.5).setDepth(7).setStrokeStyle(2, 0xffffff).setAlpha(0);
-        
-        // Timing bar progress (filled) - left-aligned within background
-        this.timingBar = this.add.rectangle(
-            W / 2 - this.timingBarWidth / 2, 
-            H * 0.35, 
-            this.timingBarWidth, 
-            this.timingBarHeight, 
-            0x00ff00
-        ).setOrigin(0, 0.5).setDepth(8).setAlpha(0);
-        
-        // Success window marker (visual indicator)
-        this.successWindowMarker = this.add.rectangle(
-            W / 2, 
-            H * 0.35,
-            150,  // Success window width (±75ms from 300ms total)
-            this.timingBarHeight,
-            0x44ff44
-        ).setOrigin(0.5, 0.5).setDepth(7).setAlpha(0.2);
+        this.defenseAnswerText = this.add.bitmapText(W / 2, H * 0.48, "pixelfont", "_", 36)
+            .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0);
+
+        this.defenseInstructionText = this.add.bitmapText(W / 2, H * 0.57, "pixelfont", "REPONDS POUR BLOQUER", 14)
+            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
 
         // Keyboard
         this.input.keyboard.on('keydown', this.handleKeyInput, this);
@@ -150,11 +135,18 @@ export class QuizScene extends Scene {
         if (this.instructionText) this.instructionText.setPosition(gameSize.width / 2, gameSize.height * 0.67);
         if (this.feedbackText) this.feedbackText.setPosition(gameSize.width / 2, gameSize.height - 30);
         
-        // Update defense UI positions
-        if (this.defenseText) this.defenseText.setPosition(gameSize.width / 2, gameSize.height * 0.25);
-        if (this.timingBarBg) this.timingBarBg.setPosition(gameSize.width / 2, gameSize.height * 0.35);
-        if (this.timingBar) this.timingBar.setPosition(gameSize.width / 2 - this.timingBarWidth / 2, gameSize.height * 0.35);
-        if (this.successWindowMarker) this.successWindowMarker.setPosition(gameSize.width / 2, gameSize.height * 0.35);
+        // Update defense quiz UI positions
+        if (this.defensePanel) {
+            this.defensePanel.setPosition(gameSize.width / 2, gameSize.height * 0.45);
+            this.defensePanel.setDisplaySize(gameSize.width * 0.6, gameSize.height * 0.25);
+        }
+        if (this.defenseQuestionText) this.defenseQuestionText.setPosition(gameSize.width / 2, gameSize.height * 0.38);
+        if (this.defenseAnswerBox) {
+            this.defenseAnswerBox.setPosition(gameSize.width / 2, gameSize.height * 0.48);
+            this.defenseAnswerBox.setDisplaySize(gameSize.width * 0.25, gameSize.height * 0.08);
+        }
+        if (this.defenseAnswerText) this.defenseAnswerText.setPosition(gameSize.width / 2, gameSize.height * 0.48);
+        if (this.defenseInstructionText) this.defenseInstructionText.setPosition(gameSize.width / 2, gameSize.height * 0.57);
     }
 
     // ---- HP BAR SYSTEM ----
@@ -422,38 +414,48 @@ export class QuizScene extends Scene {
     startDefensePhase(damageToBlock) {
         this.isDefensePhase = true;
         this.playerDefended = false;
-        this.defenseKeyPressed = false;
-        this.defenseStartTime = this.time.now;
+        this.defenseAnswer = "";
+        this.damageToBlock = damageToBlock;
+
+        // Generate a defense question
+        this.defenseQuestion = this.quizManager.generateQuestion();
 
         // Show defense UI
-        this.defenseText.setAlpha(1);
-        this.timingBarBg.setAlpha(1);
-        this.successWindowMarker.setAlpha(0.2);  // Show success window
-        this.timingBar.setAlpha(1).setDisplayWidth(this.timingBarWidth);
+        this.defensePanel.setAlpha(1);
+        this.defenseQuestionText.setText(this.defenseQuestion.text).setAlpha(1);
+        this.defenseAnswerBox.setAlpha(1);
+        this.defenseAnswerText.setText("_").setAlpha(1);
+        this.defenseInstructionText.setAlpha(1);
+    }
 
-        // Animate timing bar emptying over defenseDuration milliseconds
-        this.tweens.add({
-            targets: this.timingBar,
-            displayWidth: 0,
-            duration: this.defenseDuration,
-            ease: 'Linear'
-        });
+    submitDefenseAnswer() {
+        if (!this.isDefensePhase) return;
 
-        // Check defense result after duration
-        this.time.delayedCall(this.defenseDuration, () => {
-            this.endDefensePhase(damageToBlock);
-        });
+        const isCorrect = this.quizManager.checkAnswer(this.defenseQuestion, this.defenseAnswer);
+        this.playerDefended = isCorrect;
+
+        // Play sound feedback
+        if (this.game.soundManager) {
+            if (isCorrect) {
+                this.game.soundManager.playSound('defense-success');
+            } else {
+                this.game.soundManager.playSound('defense-fail');
+            }
+        }
+
+        // End the defense phase
+        this.endDefensePhase(this.damageToBlock);
     }
 
     endDefensePhase(damageToBlock) {
         this.isDefensePhase = false;
-        this.defenseKeyPressed = false;
 
         // Hide defense UI
-        this.defenseText.setAlpha(0);
-        this.timingBarBg.setAlpha(0);
-        this.timingBar.setAlpha(0);
-        this.successWindowMarker.setAlpha(0);
+        this.defensePanel.setAlpha(0);
+        this.defenseQuestionText.setAlpha(0);
+        this.defenseAnswerBox.setAlpha(0);
+        this.defenseAnswerText.setAlpha(0);
+        this.defenseInstructionText.setAlpha(0);
 
         let actualDamage = damageToBlock;
         let feedbackText = '';
@@ -642,27 +644,22 @@ export class QuizScene extends Scene {
     // ---- INPUT ----
 
     handleKeyInput(event) {
-        // Handle defense phase
+        // Handle defense phase (math-based)
         if (this.isDefensePhase) {
-            if (event.key === 'Enter' && !this.defenseKeyPressed) {
-                this.defenseKeyPressed = true;
-                const elapsedMs = this.time.now - this.defenseStartTime;
-                const defenseWindow = this.quizManager.calculateDefenseWindow(this.defenseDuration);
-                const isDefenseSuccess = this.quizManager.checkDefenseTiming(
-                    defenseWindow.windowStart,
-                    defenseWindow.windowEnd,
-                    elapsedMs
-                );
-                this.playerDefended = isDefenseSuccess;
+            const key = event.key;
 
-                // Play sound IMMEDIATELY on input
-                if (this.game.soundManager) {
-                    if (isDefenseSuccess) {
-                        this.game.soundManager.playSound('defense-success');
-                    } else {
-                        this.game.soundManager.playSound('defense-fail');
-                    }
-                }
+            if (/^[0-9]$/.test(key) && this.defenseAnswer.length < 3) {
+                this.defenseAnswer += key;
+                this.defenseAnswerText.setText(this.defenseAnswer);
+            }
+
+            if (key === 'Backspace' && this.defenseAnswer.length > 0) {
+                this.defenseAnswer = this.defenseAnswer.slice(0, -1);
+                this.defenseAnswerText.setText(this.defenseAnswer || "_");
+            }
+
+            if (key === 'Enter' && this.defenseAnswer.length > 0) {
+                this.submitDefenseAnswer();
             }
             return;
         }
