@@ -43,6 +43,9 @@ export class GameScene extends Scene {
         // Setup collisions
         this.setupCollisions();
         
+        // Configure camera to fit room and scale properly
+        this.setupCamera();
+        
         // Input
         this.cursors = this.input.keyboard.createCursorKeys();
         
@@ -56,6 +59,24 @@ export class GameScene extends Scene {
         
         // Listen for quiz results
         this.game.events.on("quiz-answer", this.onQuizAnswer, this);
+        
+        // Listen for window resize
+        this.scale.on('resize', () => this.setupCamera());
+    }
+    
+    setupCamera() {
+        const camera = this.cameras.main;
+        const roomPixelWidth = this.roomWidth * this.tileSize;
+        const roomPixelHeight = this.roomHeight * this.tileSize;
+        
+        // Calculate zoom to fit room in viewport with small margin
+        const zoomX = (this.scale.width * 0.9) / roomPixelWidth;
+        const zoomY = (this.scale.height * 0.9) / roomPixelHeight;
+        const zoom = Math.min(zoomX, zoomY);
+        
+        // Allow zooming out even below 1.0 to fit large rooms on small screens
+        camera.setZoom(zoom);
+        camera.centerOn(roomPixelWidth / 2, roomPixelHeight / 2);
     }
 
     renderRoom(room) {

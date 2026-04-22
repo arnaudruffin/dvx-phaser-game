@@ -19,6 +19,11 @@ export class HudScene extends Scene {
     }
 
     create() {
+        // Configure camera for HUD overlay (fixed to viewport, no zoom/scroll)
+        const camera = this.cameras.main;
+        camera.setZoom(1);
+        camera.setScroll(0, 0);
+
         const BAR_X = 10;
         const BAR_Y = 38;
         const BAR_WIDTH = 150;
@@ -39,6 +44,16 @@ export class HudScene extends Scene {
         // Instructions
         this.add.bitmapText(10, this.scale.height - 30, "pixelfont", "FLECHES:BOUGER  TOUCHE UN MONSTRE:COMBAT", 16)
             .setAlpha(0.7);
+        
+        // Listen for window resize to update layout
+        this.scale.on('resize', this.handleResize, this);
+    }
+    
+    handleResize(gameSize) {
+        // Update room text position on resize
+        if (this.roomText) {
+            this.roomText.setPosition(gameSize.width - 10, 10);
+        }
     }
 
     _getHpColor(hp, maxHp) {

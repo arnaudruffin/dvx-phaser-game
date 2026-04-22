@@ -29,40 +29,44 @@ export class QuizScene extends Scene {
         const W = this.scale.width;
         const H = this.scale.height;
 
+        // Store dimensions for use in other methods
+        this.screenW = W;
+        this.screenH = H;
+
         // Dark background
         this.add.rectangle(0, 0, W, H, 0x0a0a1a).setOrigin(0, 0).setDepth(0);
 
         // --- Player sprite (left side) ---
-        this.playerSprite = this.add.image(-80, 180, 'player').setScale(3).setDepth(2);
-        this.playerBaseX = 150;
+        this.playerSprite = this.add.image(-80, H * 0.3, 'player').setScale(3).setDepth(2);
+        this.playerBaseX = W * 0.2;
 
         // --- Enemy sprite (right side) ---
-        this.enemySprite = this.add.image(W + 80, 180, this.enemyConfig.texture).setScale(3).setDepth(2);
-        this.enemyBaseX = 650;
+        this.enemySprite = this.add.image(W + 80, H * 0.3, this.enemyConfig.texture).setScale(3).setDepth(2);
+        this.enemyBaseX = W * 0.8;
 
         // --- Player HP bar ---
-        this.createHpBar(80, 260, 180, 'player');
+        this.createHpBar(W * 0.15, H * 0.45, 180, 'player');
         // --- Enemy HP bar ---
-        this.createHpBar(540, 260, 180, 'enemy');
+        this.createHpBar(W * 0.65, H * 0.45, 180, 'enemy');
 
         // Names
-        this.add.bitmapText(150, 295, "pixelfont", "CHEVALIER", 16).setOrigin(0.5, 0).setDepth(5);
-        this.add.bitmapText(650, 295, "pixelfont", this.enemyConfig.name.toUpperCase(), 16).setOrigin(0.5, 0).setDepth(5);
+        this.playerNameText = this.add.bitmapText(W * 0.2, H * 0.52, "pixelfont", "CHEVALIER", 16).setOrigin(0.5, 0).setDepth(5);
+        this.enemyNameText = this.add.bitmapText(W * 0.8, H * 0.52, "pixelfont", this.enemyConfig.name.toUpperCase(), 16).setOrigin(0.5, 0).setDepth(5);
 
         // --- Question panel (hidden initially) ---
-        this.questionPanel = this.add.rectangle(W / 2, 400, 400, 200, 0x2d2d44)
+        this.questionPanel = this.add.rectangle(W / 2, H * 0.55, W * 0.6, H * 0.3, 0x2d2d44)
             .setStrokeStyle(3, 0x6666aa).setDepth(5).setAlpha(0);
 
-        this.questionText = this.add.bitmapText(W / 2, 350, "pixelfont", "", 32)
+        this.questionText = this.add.bitmapText(W / 2, H * 0.48, "pixelfont", "", 32)
             .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
 
         // Answer input box
-        this.answerBox = this.add.rectangle(W / 2, 410, 150, 50, 0x1a1a2e)
+        this.answerBox = this.add.rectangle(W / 2, H * 0.57, W * 0.25, H * 0.08, 0x1a1a2e)
             .setStrokeStyle(2, 0xffffff).setDepth(6).setAlpha(0);
-        this.answerText = this.add.bitmapText(W / 2, 410, "pixelfont", "_", 36)
+        this.answerText = this.add.bitmapText(W / 2, H * 0.57, "pixelfont", "_", 36)
             .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0);
 
-        this.instructionText = this.add.bitmapText(W / 2, 460, "pixelfont", "TAPE TA REPONSE", 16)
+        this.instructionText = this.add.bitmapText(W / 2, H * 0.67, "pixelfont", "TAPE TA REPONSE", 16)
             .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
 
         // --- Round counter (bottom-left) ---
@@ -76,8 +80,38 @@ export class QuizScene extends Scene {
         // Keyboard
         this.input.keyboard.on('keydown', this.handleKeyInput, this);
 
+        // Listen for window resize
+        this.scale.on('resize', (gameSize) => this.handleResize(gameSize));
+
         // Start intro
         this.playIntro();
+    }
+
+    handleResize(gameSize) {
+        this.screenW = gameSize.width;
+        this.screenH = gameSize.height;
+        
+        // Update sprite positions
+        this.playerBaseX = gameSize.width * 0.2;
+        this.enemyBaseX = gameSize.width * 0.8;
+        this.playerSprite.setPosition(this.playerBaseX, gameSize.height * 0.3);
+        this.enemySprite.setPosition(this.enemyBaseX, gameSize.height * 0.3);
+        
+        // Update UI elements positions
+        if (this.playerNameText) this.playerNameText.setPosition(gameSize.width * 0.2, gameSize.height * 0.52);
+        if (this.enemyNameText) this.enemyNameText.setPosition(gameSize.width * 0.8, gameSize.height * 0.52);
+        if (this.questionPanel) {
+            this.questionPanel.setPosition(gameSize.width / 2, gameSize.height * 0.55);
+            this.questionPanel.setDisplaySize(gameSize.width * 0.6, gameSize.height * 0.3);
+        }
+        if (this.questionText) this.questionText.setPosition(gameSize.width / 2, gameSize.height * 0.48);
+        if (this.answerBox) {
+            this.answerBox.setPosition(gameSize.width / 2, gameSize.height * 0.57);
+            this.answerBox.setDisplaySize(gameSize.width * 0.25, gameSize.height * 0.08);
+        }
+        if (this.answerText) this.answerText.setPosition(gameSize.width / 2, gameSize.height * 0.57);
+        if (this.instructionText) this.instructionText.setPosition(gameSize.width / 2, gameSize.height * 0.67);
+        if (this.feedbackText) this.feedbackText.setPosition(gameSize.width / 2, gameSize.height - 30);
     }
 
     // ---- HP BAR SYSTEM ----
@@ -152,7 +186,7 @@ export class QuizScene extends Scene {
         });
 
         // Big "COMBAT!" text
-        const combatText = this.add.bitmapText(this.scale.width / 2, 180, "pixelfont", "COMBAT!", 48)
+        const combatText = this.add.bitmapText(this.scale.width / 2, this.scale.height * 0.25, "pixelfont", "COMBAT!", 48)
             .setOrigin(0.5, 0.5).setDepth(20).setScale(2).setAlpha(0);
 
         this.tweens.add({
@@ -443,10 +477,10 @@ export class QuizScene extends Scene {
             ease: 'Power2'
         });
 
-        const vicText = this.add.bitmapText(this.scale.width / 2, 180, "pixelfont", "VICTOIRE!", 40)
+        const vicText = this.add.bitmapText(this.scale.width / 2, this.scale.height * 0.25, "pixelfont", "VICTOIRE!", 40)
             .setOrigin(0.5, 0.5).setTint(0xffd700).setDepth(20).setAlpha(0);
 
-        const scoreText = this.add.bitmapText(this.scale.width / 2, 230, "pixelfont", `+${this.totalScore} PTS`, 24)
+        const scoreText = this.add.bitmapText(this.scale.width / 2, this.scale.height * 0.35, "pixelfont", `+${this.totalScore} PTS`, 24)
             .setOrigin(0.5, 0.5).setTint(0xffd700).setDepth(20).setAlpha(0);
 
         this.tweens.add({
@@ -480,7 +514,7 @@ export class QuizScene extends Scene {
             duration: 600
         });
 
-        const defText = this.add.bitmapText(this.scale.width / 2, 180, "pixelfont", "DEFAITE...", 40)
+        const defText = this.add.bitmapText(this.scale.width / 2, this.scale.height * 0.25, "pixelfont", "DEFAITE...", 40)
             .setOrigin(0.5, 0.5).setTint(0xff4444).setDepth(20).setAlpha(0);
 
         this.tweens.add({

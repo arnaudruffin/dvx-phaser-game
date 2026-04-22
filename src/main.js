@@ -10,14 +10,16 @@ import * as Phaser from 'phaser';
 const config = {
     type: Phaser.AUTO,
     parent: "phaser-container",
-    width: 800,
-    height: 600,
+    width: window.innerWidth,
+    height: window.innerHeight,
     backgroundColor: "#1a1a2e",
     pixelArt: true,
     roundPixels: true,
     scale: {
-        mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        expandParent: true,
+        fullscreenTarget: 'phaser-container'
     },
     physics: {
         default: "arcade",
