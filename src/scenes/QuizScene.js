@@ -110,6 +110,10 @@ export class QuizScene extends Scene {
         this.defenseTimerText = this.add.bitmapText(W / 2, timerBarY - 14, "pixelfont", "4", 18)
             .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0).setTint(0xff8800);
 
+        // Shield sprite for successful block animation (hidden by default)
+        this.shieldSprite = this.add.image(W * 0.2 + 48, H * 0.3, 'shield')
+            .setScale(0).setAlpha(0).setDepth(4);
+
         // Keyboard
         this.input.keyboard.on('keydown', this.handleKeyInput, this);
 
@@ -552,8 +556,12 @@ export class QuizScene extends Scene {
         this.playerHp = Math.max(0, this.playerHp - actualDamage);
         this.updateHpBar('player', this.playerHp, this.playerMaxHp);
 
-        // Flash sprite and show feedback
-        this.flashSprite(this.playerSprite);
+        // Visual feedback depending on parade outcome
+        if (this.playerDefended) {
+            this.playBlockAnimation();
+        } else {
+            this.flashSprite(this.playerSprite);
+        }
         this.showFloatingDamage(
             actualDamage === 0 ? feedbackText : `-${actualDamage}`,
             this.playerBaseX,
@@ -581,6 +589,40 @@ export class QuizScene extends Scene {
         this.time.delayedCall(150, () => {
             sprite.clearTint();
         });
+    }
+
+    playBlockAnimation() {
+        // Flash player blue (successful block — not hit)
+        this.playerSprite.setTint(0x4488ff);
+        this.time.delayedCall(300, () => this.playerSprite.clearTint());
+
+        // Position shield in front of the player
+        this.shieldSprite.setPosition(this.playerBaseX + 48, this.screenH * 0.3);
+        this.shieldSprite.setScale(0).setAlpha(1);
+
+        // Pop-in: scale 0 → 3.5
+        this.tweens.add({
+            targets: this.shieldSprite,
+            scale: 3.5,
+            duration: 150,
+            ease: 'Back.Out',
+            onComplete: () => {
+                // Hold briefly then burst-fade out
+                this.tweens.add({
+                    targets: this.shieldSprite,
+                    scale: 5,
+                    alpha: 0,
+                    duration: 350,
+                    ease: 'Power2',
+                    onComplete: () => {
+                        this.shieldSprite.setScale(0).setAlpha(0);
+                    }
+                });
+            }
+        });
+
+        // Light screen flash (brief gold overlay)
+        this.cameras.main.flash(200, 255, 215, 0, false, null, this);
     }
 
     showDamageTier(result, x, y) {

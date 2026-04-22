@@ -229,6 +229,22 @@ export class Preloader extends Phaser.Scene {
         bossDragonGfx.fillTriangle(24, 26, 26, 26, 25, 28); // right fang
         bossDragonGfx.generateTexture('boss-dragon', tileSize, tileSize);
 
+        // Shield - heater shield shape (medieval) for successful block animation
+        const shieldGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        // Silver border (full shape)
+        shieldGfx.fillStyle(0xccccff);
+        shieldGfx.fillRect(4, 2, 24, 20);           // top rectangle
+        shieldGfx.fillTriangle(4, 20, 28, 20, 16, 30); // bottom triangle
+        // Blue body (slightly inset)
+        shieldGfx.fillStyle(0x2255cc);
+        shieldGfx.fillRect(6, 4, 20, 17);           // inner top
+        shieldGfx.fillTriangle(6, 19, 26, 19, 16, 28); // inner triangle
+        // Gold cross
+        shieldGfx.fillStyle(0xffd700);
+        shieldGfx.fillRect(14, 5, 4, 19);           // vertical bar
+        shieldGfx.fillRect(6, 10, 20, 4);           // horizontal bar
+        shieldGfx.generateTexture('shield', tileSize, tileSize);
+
         // Door tile
         const doorGraphics = this.make.graphics({ x: 0, y: 0, add: false });
         doorGraphics.fillStyle(0x8b4513);
