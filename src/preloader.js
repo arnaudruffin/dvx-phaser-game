@@ -163,6 +163,72 @@ export class Preloader extends Phaser.Scene {
         ogreGfx.fillTriangle(20, 24, 22, 24, 21, 27); // right fang
         ogreGfx.generateTexture('enemy-ogre', tileSize, tileSize);
 
+        // Boss Gobelin - large, golden, menacing version with crown
+        const bossGobelinGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        bossGobelinGfx.fillStyle(0x88dd44);
+        bossGobelinGfx.fillCircle(16, 16, 13); // larger body
+        bossGobelinGfx.fillStyle(0x66bb22);
+        bossGobelinGfx.fillTriangle(2, 10, 6, 0, 8, 10); // left pointy ear
+        bossGobelinGfx.fillTriangle(24, 10, 26, 0, 30, 10); // right pointy ear
+        bossGobelinGfx.fillStyle(0xffdd00);
+        bossGobelinGfx.fillRect(2, 2, 28, 3); // golden crown
+        bossGobelinGfx.fillRect(4, 0, 24, 2);
+        bossGobelinGfx.fillStyle(0xffff00);
+        bossGobelinGfx.fillCircle(11, 14, 4); // left eye
+        bossGobelinGfx.fillCircle(21, 14, 4); // right eye
+        bossGobelinGfx.fillStyle(0x000000);
+        bossGobelinGfx.fillCircle(12, 14, 2); // left pupil
+        bossGobelinGfx.fillCircle(22, 14, 2); // right pupil
+        bossGobelinGfx.fillStyle(0xcc0000);
+        bossGobelinGfx.fillRect(8, 24, 16, 3); // wider grin in red
+        bossGobelinGfx.generateTexture('boss-gobelin', tileSize, tileSize);
+
+        // Boss Troll - massive gray creature with club-like features
+        const bossTrollGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        bossTrollGfx.fillStyle(0x555577);
+        bossTrollGfx.fillCircle(16, 16, 15); // very large body
+        bossTrollGfx.fillStyle(0x333355);
+        bossTrollGfx.fillRect(4, 2, 10, 8); // left rough horn
+        bossTrollGfx.fillRect(18, 2, 10, 8); // right rough horn
+        bossTrollGfx.fillStyle(0xff6600);
+        bossTrollGfx.fillCircle(10, 14, 5); // left eye (larger, orange)
+        bossTrollGfx.fillCircle(22, 14, 5); // right eye
+        bossTrollGfx.fillStyle(0x000000);
+        bossTrollGfx.fillCircle(10, 14, 2); // left pupil
+        bossTrollGfx.fillCircle(22, 14, 2); // right pupil
+        bossTrollGfx.fillStyle(0x887755);
+        bossTrollGfx.fillRect(6, 20, 20, 4); // harsh mouth
+        bossTrollGfx.fillStyle(0xffffff);
+        bossTrollGfx.fillRect(8, 21, 2, 2); // teeth
+        bossTrollGfx.fillRect(12, 21, 2, 2);
+        bossTrollGfx.fillRect(18, 21, 2, 2);
+        bossTrollGfx.fillRect(22, 21, 2, 2);
+        bossTrollGfx.generateTexture('boss-troll', tileSize, tileSize);
+
+        // Boss Dragon - red/gold scaled beast with spikes
+        const bossDragonGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        bossDragonGfx.fillStyle(0xdd3333);
+        bossDragonGfx.fillCircle(16, 18, 16); // massive body
+        bossDragonGfx.fillStyle(0xffaa00);
+        bossDragonGfx.fillRect(2, 0, 6, 6); // left spike
+        bossDragonGfx.fillRect(24, 0, 6, 6); // right spike
+        bossDragonGfx.fillRect(8, 2, 4, 5); // middle spike
+        bossDragonGfx.fillRect(20, 2, 4, 5); // middle-right spike
+        bossDragonGfx.fillStyle(0xffff00);
+        bossDragonGfx.fillCircle(9, 15, 6); // left eye (large, yellow)
+        bossDragonGfx.fillCircle(23, 15, 6); // right eye
+        bossDragonGfx.fillStyle(0x000000);
+        bossDragonGfx.fillCircle(9, 15, 3); // left pupil
+        bossDragonGfx.fillCircle(23, 15, 3); // right pupil
+        bossDragonGfx.fillStyle(0xff6600);
+        bossDragonGfx.fillRect(4, 22, 24, 4); // mouth
+        bossDragonGfx.fillStyle(0xffcc00);
+        bossDragonGfx.fillTriangle(6, 26, 8, 26, 7, 28); // left fang
+        bossDragonGfx.fillTriangle(10, 26, 12, 26, 11, 28);
+        bossDragonGfx.fillTriangle(20, 26, 22, 26, 21, 28);
+        bossDragonGfx.fillTriangle(24, 26, 26, 26, 25, 28); // right fang
+        bossDragonGfx.generateTexture('boss-dragon', tileSize, tileSize);
+
         // Door tile
         const doorGraphics = this.make.graphics({ x: 0, y: 0, add: false });
         doorGraphics.fillStyle(0x8b4513);

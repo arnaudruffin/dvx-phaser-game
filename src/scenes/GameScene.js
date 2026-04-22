@@ -54,7 +54,8 @@ export class GameScene extends Scene {
             score: 0, 
             room: "0,0",
             playerHp: this.player.currentHp,
-            playerMaxHp: this.player.maxHp
+            playerMaxHp: this.player.maxHp,
+            isBossRoom: this.currentRoom.isBossRoom
         });
         
         // Listen for quiz results
@@ -239,7 +240,7 @@ export class GameScene extends Scene {
         this.player.setPosition(newPlayerPos.x, newPlayerPos.y);
         
         // Update HUD
-        this.scene.get("HudScene").updateRoom(`${newRoomX},${newRoomY}`);
+        this.scene.get("HudScene").updateRoom(`${newRoomX},${newRoomY}`, newRoom.isBossRoom);
         
         // Re-setup collisions
         this.setupCollisions();

@@ -33,6 +33,39 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 5,
             maxTable: 10,
             scoreValue: 350
+        },
+        'boss-gobelin': {
+            texture: 'boss-gobelin',
+            name: 'Chef Gobelin',
+            maxHp: 50,
+            damage: 15,
+            rounds: 3,
+            minTable: 2,
+            maxTable: 7,
+            scoreValue: 400,
+            isBoss: true
+        },
+        'boss-troll': {
+            texture: 'boss-troll',
+            name: 'Troll des Cavernes',
+            maxHp: 120,
+            damage: 30,
+            rounds: 5,
+            minTable: 5,
+            maxTable: 10,
+            scoreValue: 800,
+            isBoss: true
+        },
+        'boss-dragon': {
+            texture: 'boss-dragon',
+            name: 'Dragon Ancien',
+            maxHp: 180,
+            damage: 45,
+            rounds: 6,
+            minTable: 7,
+            maxTable: 10,
+            scoreValue: 1500,
+            isBoss: true
         }
     };
 

@@ -67,41 +67,63 @@ export class DungeonGenerator {
             }
         }
 
-        // Generate enemy positions (1-3 enemies per room, not in start room)
+        // Check if this is a boss room
+        const isBossRoom = this.isBossRoom(x, y);
+        
+        // Generate enemy positions (1-3 enemies per room, 1 boss per boss room, not in start room)
         const enemyPositions = [];
         const isStartRoom = x === 0 && y === 0;
         
         if (!isStartRoom) {
-            const enemyCount = Math.floor(Math.random() * 3) + 1;
-            for (let i = 0; i < enemyCount; i++) {
+            if (isBossRoom) {
+                // Boss room: spawn exactly 1 boss
                 let attempts = 0;
                 while (attempts < 20) {
                     const ex = Math.floor(Math.random() * (this.roomWidth - 4)) + 2;
                     const ey = Math.floor(Math.random() * (this.roomHeight - 4)) + 2;
                     
-                    // Check if floor and not too close to center
-                    if (tiles[ey][ex] === 0 && (Math.abs(ex - midX) > 2 || Math.abs(ey - midY) > 2)) {
+                    // Check if floor and near center (bosses should be prominent)
+                    if (tiles[ey][ex] === 0) {
                         const posX = ex * this.tileSize + this.tileSize / 2;
                         const posY = ey * this.tileSize + this.tileSize / 2;
-                        
-                        // Check not overlapping other enemies
-                        const tooClose = enemyPositions.some(pos => 
-                            Math.abs(pos.x - posX) < this.tileSize && Math.abs(pos.y - posY) < this.tileSize
-                        );
-                        
-                        if (!tooClose) {
-                            enemyPositions.push({ x: posX, y: posY, type: this.pickEnemyType(x, y) });
-                            break;
-                        }
+                        enemyPositions.push({ x: posX, y: posY, type: this.pickBossType(x, y) });
+                        break;
                     }
                     attempts++;
+                }
+            } else {
+                // Normal room: 1-3 regular enemies
+                const enemyCount = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < enemyCount; i++) {
+                    let attempts = 0;
+                    while (attempts < 20) {
+                        const ex = Math.floor(Math.random() * (this.roomWidth - 4)) + 2;
+                        const ey = Math.floor(Math.random() * (this.roomHeight - 4)) + 2;
+                        
+                        // Check if floor and not too close to center
+                        if (tiles[ey][ex] === 0 && (Math.abs(ex - midX) > 2 || Math.abs(ey - midY) > 2)) {
+                            const posX = ex * this.tileSize + this.tileSize / 2;
+                            const posY = ey * this.tileSize + this.tileSize / 2;
+                            
+                            // Check not overlapping other enemies
+                            const tooClose = enemyPositions.some(pos => 
+                                Math.abs(pos.x - posX) < this.tileSize && Math.abs(pos.y - posY) < this.tileSize
+                            );
+                            
+                            if (!tooClose) {
+                                enemyPositions.push({ x: posX, y: posY, type: this.pickEnemyType(x, y) });
+                                break;
+                            }
+                        }
+                        attempts++;
+                    }
                 }
             }
         }
 
-        // Generate potion positions (0-1 per room, ~30% chance, not in start room)
+        // Generate potion positions (0-1 per room, ~30% chance, not in start room, not in boss rooms)
         const potionPositions = [];
-        if (!isStartRoom && Math.random() < 0.3) {
+        if (!isStartRoom && !isBossRoom && Math.random() < 0.3) {
             let attempts = 0;
             while (attempts < 20) {
                 const px = Math.floor(Math.random() * (this.roomWidth - 4)) + 2;
@@ -130,11 +152,31 @@ export class DungeonGenerator {
             key: key,
             tiles: tiles,
             enemyPositions: enemyPositions,
-            potionPositions: potionPositions
+            potionPositions: potionPositions,
+            isBossRoom: isBossRoom
         };
 
         this.rooms.set(key, room);
         return room;
+    }
+
+    isBossRoom(x, y) {
+        // Boss rooms appear every 5 rooms (Manhattan distance)
+        const distance = Math.abs(x) + Math.abs(y);
+        return distance > 0 && distance % 5 === 0;
+    }
+
+    pickBossType(roomX, roomY) {
+        const distance = Math.abs(roomX) + Math.abs(roomY);
+        
+        // Progressive boss types based on distance
+        if (distance <= 5) {
+            return 'boss-gobelin';
+        } else if (distance <= 15) {
+            return 'boss-troll';
+        } else {
+            return 'boss-dragon';
+        }
     }
 
     pickEnemyType(roomX, roomY) {

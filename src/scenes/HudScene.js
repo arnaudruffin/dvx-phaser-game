@@ -3,6 +3,7 @@ import { Scene } from "phaser";
 export class HudScene extends Scene {
     scoreText = null;
     roomText = null;
+    bossIndicator = null;
     hpBarBg = null;
     hpBarFg = null;
     hpText = null;
@@ -16,6 +17,7 @@ export class HudScene extends Scene {
         this.roomKey = data.room || "0,0";
         this.playerHp = data.playerHp ?? 100;
         this.playerMaxHp = data.playerMaxHp ?? 100;
+        this.isBossRoom = data.isBossRoom || false;
     }
 
     create() {
@@ -41,6 +43,22 @@ export class HudScene extends Scene {
         this.roomText = this.add.bitmapText(this.scale.width - 10, 10, "pixelfont", `SALLE:${this.roomKey}`, 24)
             .setOrigin(1, 0);
         
+        // Boss indicator (flashing when in boss room)
+        if (this.isBossRoom) {
+            this.bossIndicator = this.add.bitmapText(this.scale.width / 2, 10, "pixelfont", "⚔ BOSS ⚔", 24)
+                .setOrigin(0.5, 0)
+                .setTint(0xff4444);
+            
+            // Flash effect
+            this.tweens.add({
+                targets: this.bossIndicator,
+                alpha: 0.5,
+                duration: 600,
+                yoyo: true,
+                repeat: -1
+            });
+        }
+        
         // Instructions
         this.add.bitmapText(10, this.scale.height - 30, "pixelfont", "FLECHES:BOUGER  TOUCHE UN MONSTRE:COMBAT", 16)
             .setAlpha(0.7);
@@ -53,6 +71,9 @@ export class HudScene extends Scene {
         // Update room text position on resize
         if (this.roomText) {
             this.roomText.setPosition(gameSize.width - 10, 10);
+        }
+        if (this.bossIndicator) {
+            this.bossIndicator.setPosition(gameSize.width / 2, 10);
         }
     }
 
@@ -92,8 +113,30 @@ export class HudScene extends Scene {
         this.scoreText.setText(`SCORE:${score.toString().padStart(6, "0")}`);
     }
 
-    updateRoom(roomKey) {
+    updateRoom(roomKey, isBossRoom = false) {
         this.roomKey = roomKey;
+        this.isBossRoom = isBossRoom;
         this.roomText.setText(`SALLE:${roomKey}`);
+        
+        // Update boss indicator
+        if (this.bossIndicator) {
+            this.bossIndicator.destroy();
+            this.bossIndicator = null;
+        }
+        
+        if (isBossRoom) {
+            this.bossIndicator = this.add.bitmapText(this.scale.width / 2, 10, "pixelfont", "⚔ BOSS ⚔", 24)
+                .setOrigin(0.5, 0)
+                .setTint(0xff4444);
+            
+            // Flash effect
+            this.tweens.add({
+                targets: this.bossIndicator,
+                alpha: 0.5,
+                duration: 600,
+                yoyo: true,
+                repeat: -1
+            });
+        }
     }
 }
