@@ -2,6 +2,8 @@ import { Physics } from "phaser";
 
 export class Player extends Physics.Arcade.Image {
     speed = 160;
+    maxHp = 100;
+    currentHp = 100;
 
     constructor(scene, x, y) {
         super(scene, x, y, "player");
@@ -32,5 +34,21 @@ export class Player extends Physics.Arcade.Image {
 
         // Normalize diagonal movement
         this.body.velocity.normalize().scale(this.speed);
+    }
+
+    takeDamage(amount) {
+        this.currentHp = Math.max(0, this.currentHp - amount);
+    }
+
+    heal(amount) {
+        this.currentHp = Math.min(this.maxHp, this.currentHp + amount);
+    }
+
+    isAlive() {
+        return this.currentHp > 0;
+    }
+
+    getHpPercent() {
+        return this.currentHp / this.maxHp;
     }
 }

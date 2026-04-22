@@ -3,8 +3,46 @@ import { Physics } from "phaser";
 export class Enemy extends Physics.Arcade.Image {
     isDefeated = false;
 
-    constructor(scene, x, y) {
-        super(scene, x, y, "enemy");
+    static ENEMY_TYPES = {
+        gobelin: {
+            texture: 'enemy-gobelin',
+            name: 'Gobelin',
+            maxHp: 30,
+            damage: 8,
+            rounds: 2,
+            minTable: 1,
+            maxTable: 5,
+            scoreValue: 100
+        },
+        squelette: {
+            texture: 'enemy-squelette',
+            name: 'Squelette',
+            maxHp: 50,
+            damage: 12,
+            rounds: 3,
+            minTable: 3,
+            maxTable: 7,
+            scoreValue: 200
+        },
+        ogre: {
+            texture: 'enemy-ogre',
+            name: 'Ogre',
+            maxHp: 80,
+            damage: 20,
+            rounds: 4,
+            minTable: 5,
+            maxTable: 10,
+            scoreValue: 350
+        }
+    };
+
+    constructor(scene, x, y, type = 'gobelin') {
+        const config = Enemy.ENEMY_TYPES[type] || Enemy.ENEMY_TYPES.gobelin;
+        super(scene, x, y, config.texture);
+
+        this.enemyType = type;
+        this.config = config;
+        this.currentHp = config.maxHp;
         
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -22,6 +60,15 @@ export class Enemy extends Physics.Arcade.Image {
             repeat: -1,
             ease: 'Sine.easeInOut'
         });
+    }
+
+    takeDamage(amount) {
+        this.currentHp = Math.max(0, this.currentHp - amount);
+        return this.currentHp;
+    }
+
+    isAlive() {
+        return this.currentHp > 0;
     }
 
     defeat() {

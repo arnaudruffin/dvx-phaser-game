@@ -95,7 +95,7 @@ export class GameScene extends Scene {
         
         // Spawn enemies
         room.enemyPositions.forEach(pos => {
-            const enemy = new Enemy(this, pos.x, pos.y);
+            const enemy = new Enemy(this, pos.x, pos.y, pos.type || 'gobelin');
             enemy.setDepth(5);
             this.enemies.add(enemy);
         });
@@ -123,11 +123,31 @@ export class GameScene extends Scene {
         
         // Pause game and launch quiz
         this.scene.pause();
-        this.scene.launch("QuizScene");
+        this.scene.launch("QuizScene", {
+            playerHp: this.player.currentHp,
+            playerMaxHp: this.player.maxHp,
+            enemyType: enemy.enemyType,
+            enemyConfig: enemy.config,
+            enemyCurrentHp: enemy.currentHp
+        });
     }
 
     onQuizAnswer(data) {
         this.scene.resume();
+        
+        // Update player HP from combat result (backward compatible)
+        if (data.playerHpRemaining !== undefined) {
+            this.player.currentHp = data.playerHpRemaining;
+            this.scene.get("HudScene").updateHealth(this.player.currentHp, this.player.maxHp);
+        }
+        
+        // Check if player died
+        if (!this.player.isAlive()) {
+            this.currentEnemy = null;
+            this.scene.stop("HudScene");
+            this.scene.start("GameOverScene", { score: this.scoreManager.getScore() });
+            return;
+        }
         
         if (data.correct && this.currentEnemy) {
             // Calculate time bonus (max 50 points for < 2 sec, min 10 points for > 10 sec)

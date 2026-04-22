@@ -90,7 +90,7 @@ export class DungeonGenerator {
                         );
                         
                         if (!tooClose) {
-                            enemyPositions.push({ x: posX, y: posY });
+                            enemyPositions.push({ x: posX, y: posY, type: this.pickEnemyType(x, y) });
                             break;
                         }
                     }
@@ -109,5 +109,20 @@ export class DungeonGenerator {
 
         this.rooms.set(key, room);
         return room;
+    }
+
+    pickEnemyType(roomX, roomY) {
+        const distance = Math.abs(roomX) + Math.abs(roomY);
+        const roll = Math.random();
+
+        if (distance <= 2) {
+            return 'gobelin';
+        } else if (distance <= 4) {
+            return roll < 0.4 ? 'gobelin' : 'squelette';
+        } else if (distance <= 6) {
+            return roll < 0.4 ? 'squelette' : 'ogre';
+        } else {
+            return roll < 0.3 ? 'squelette' : 'ogre';
+        }
     }
 }
