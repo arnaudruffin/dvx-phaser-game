@@ -29,6 +29,7 @@ export class QuizScene extends Scene {
         this.playerDefended = false;
         this.defenseAnswer = "";
         this.defenseQuestion = null;
+        this.pendingNextRound = false;
     }
 
     create() {
@@ -404,10 +405,15 @@ export class QuizScene extends Scene {
             },
             onComplete: () => {
                 this.time.delayedCall(500, () => {
-                    if (this.playerHp <= 0) {
-                        this.playDefeat();
+                    if (this.isDefensePhase) {
+                        // Defense phase still active — defer next round until player submits
+                        this.pendingNextRound = true;
                     } else {
-                        this.startNextRound();
+                        if (this.playerHp <= 0) {
+                            this.playDefeat();
+                        } else {
+                            this.startNextRound();
+                        }
                     }
                 });
             }
@@ -485,6 +491,18 @@ export class QuizScene extends Scene {
             130,
             feedbackColor
         );
+
+        // If the next-round timer already fired while we were waiting for the player to answer
+        if (this.pendingNextRound) {
+            this.pendingNextRound = false;
+            this.time.delayedCall(300, () => {
+                if (this.playerHp <= 0) {
+                    this.playDefeat();
+                } else {
+                    this.startNextRound();
+                }
+            });
+        }
     }
 
     // ---- VISUAL EFFECTS ----
