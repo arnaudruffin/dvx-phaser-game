@@ -264,7 +264,10 @@ export class QuizScene extends Scene {
         }
 
         this.roundText.setText(`ROUND ${this.currentRound}/${this.maxRounds}`).setAlpha(1);
-        this.showQuestion();
+        // Delay before showing the next question to prevent overlapping with defense UI
+        this.time.delayedCall(300, () => {
+            this.showQuestion();
+        });
     }
 
     showQuestion() {
