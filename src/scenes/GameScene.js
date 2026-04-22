@@ -1,4 +1,4 @@
-import { Scene } from "phaser";
+import { Scene, Math as PhaserMath } from "phaser";
 import { Player } from "../gameobjects/Player";
 import { Enemy } from "../gameobjects/Enemy";
 import { DungeonGenerator } from "../systems/DungeonGenerator";
@@ -64,6 +64,7 @@ export class GameScene extends Scene {
         if (this.doorsGroup) this.doorsGroup.destroy(true);
         if (this.floorGroup) this.floorGroup.destroy(true);
         this.enemies.clear(true, true);
+        if (this.immuneEnemies) this.immuneEnemies.clear();
         if (this.potions) this.potions.clear(true, true);
         
         this.wallsGroup = this.physics.add.staticGroup();
@@ -139,7 +140,8 @@ export class GameScene extends Scene {
     }
 
     onEnemyCollision(player, enemy) {
-        if (enemy.isDefeated || this.scene.isActive("QuizScene") || this.combatCooldown) return;
+        if (enemy.isDefeated || this.scene.isActive("QuizScene")) return;
+        if (this.immuneEnemies && this.immuneEnemies.has(enemy)) return;
         
         // Store current enemy for combat result
         this.currentEnemy = enemy;
@@ -158,9 +160,11 @@ export class GameScene extends Scene {
     onQuizAnswer(data) {
         this.scene.resume();
         
-        // Brief cooldown to prevent overlap from re-triggering combat immediately
-        this.combatCooldown = true;
-        this.time.delayedCall(500, () => { this.combatCooldown = false; });
+        // Mark enemy as immune until the player moves away
+        if (!this.immuneEnemies) this.immuneEnemies = new Set();
+        if (this.currentEnemy && !data.enemyDefeated) {
+            this.immuneEnemies.add(this.currentEnemy);
+        }
         
         // Update player HP from combat result
         if (data.playerHpRemaining !== undefined) {
@@ -288,6 +292,18 @@ export class GameScene extends Scene {
         if (!this.player) return;
         
         this.player.update(this.cursors);
+
+        // Lift enemy immunity once the player moves away
+        if (this.immuneEnemies && this.immuneEnemies.size > 0) {
+            const SAFE_DIST = 40;
+            for (const enemy of this.immuneEnemies) {
+                if (!enemy.active) {
+                    this.immuneEnemies.delete(enemy);
+                } else if (PhaserMath.Distance.Between(this.player.x, this.player.y, enemy.x, enemy.y) > SAFE_DIST) {
+                    this.immuneEnemies.delete(enemy);
+                }
+            }
+        }
     }
 
     shutdown() {
