@@ -29,6 +29,7 @@ export class GameScene extends Scene {
         
         // Create enemy group
         this.enemies = this.physics.add.group();
+        this.potions = this.physics.add.group();
         
         // Generate starting room
         this.currentRoom = this.dungeonGenerator.generateRoom(0, 0);
@@ -46,7 +47,12 @@ export class GameScene extends Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
         
         // Launch HUD
-        this.scene.launch("HudScene", { score: 0, room: "0,0" });
+        this.scene.launch("HudScene", { 
+            score: 0, 
+            room: "0,0",
+            playerHp: this.player.currentHp,
+            playerMaxHp: this.player.maxHp
+        });
         
         // Listen for quiz results
         this.game.events.on("quiz-answer", this.onQuizAnswer, this);
@@ -58,6 +64,7 @@ export class GameScene extends Scene {
         if (this.doorsGroup) this.doorsGroup.destroy(true);
         if (this.floorGroup) this.floorGroup.destroy(true);
         this.enemies.clear(true, true);
+        if (this.potions) this.potions.clear(true, true);
         
         this.wallsGroup = this.physics.add.staticGroup();
         this.doorsGroup = this.physics.add.staticGroup();
@@ -100,6 +107,23 @@ export class GameScene extends Scene {
             this.enemies.add(enemy);
         });
         
+        // Spawn potions
+        if (room.potionPositions) {
+            room.potionPositions.forEach(pos => {
+                const potion = this.physics.add.image(pos.x, pos.y, 'potion');
+                potion.setDepth(3);
+                this.tweens.add({
+                    targets: potion,
+                    y: pos.y - 6,
+                    duration: 1000,
+                    yoyo: true,
+                    repeat: -1,
+                    ease: 'Sine.easeInOut'
+                });
+                this.potions.add(potion);
+            });
+        }
+
         // Ensure player stays on top
         if (this.player) {
             this.player.setDepth(10);
@@ -117,11 +141,10 @@ export class GameScene extends Scene {
     onEnemyCollision(player, enemy) {
         if (enemy.isDefeated || this.scene.isActive("QuizScene")) return;
         
-        // Store current enemy for quiz result
+        // Store current enemy for combat result
         this.currentEnemy = enemy;
-        this.quizStartTime = Date.now();
         
-        // Pause game and launch quiz
+        // Pause game and launch combat
         this.scene.pause();
         this.scene.launch("QuizScene", {
             playerHp: this.player.currentHp,
@@ -135,7 +158,7 @@ export class GameScene extends Scene {
     onQuizAnswer(data) {
         this.scene.resume();
         
-        // Update player HP from combat result (backward compatible)
+        // Update player HP from combat result
         if (data.playerHpRemaining !== undefined) {
             this.player.currentHp = data.playerHpRemaining;
             this.scene.get("HudScene").updateHealth(this.player.currentHp, this.player.maxHp);
@@ -145,16 +168,16 @@ export class GameScene extends Scene {
         if (!this.player.isAlive()) {
             this.currentEnemy = null;
             this.scene.stop("HudScene");
-            this.scene.start("GameOverScene", { score: this.scoreManager.getScore() });
+            this.scene.start("GameOverScene", { 
+                score: this.scoreManager.getScore(),
+                enemiesDefeated: this.scoreManager.getEnemiesDefeated()
+            });
             return;
         }
         
-        if (data.correct && this.currentEnemy) {
-            // Calculate time bonus (max 50 points for < 2 sec, min 10 points for > 10 sec)
-            const elapsed = (Date.now() - this.quizStartTime) / 1000;
-            let bonus = Math.max(10, Math.floor(50 - elapsed * 5));
-            
-            const points = 100 + bonus;
+        if (data.enemyDefeated && this.currentEnemy) {
+            // Use score from combat scene
+            const points = data.score || 100;
             this.scoreManager.addPoints(points);
             
             // Defeat enemy
@@ -199,9 +222,12 @@ export class GameScene extends Scene {
         if (this.enemyOverlap) this.enemyOverlap.destroy();
         if (this.doorOverlap) this.doorOverlap.destroy();
 
+        if (this.potionOverlap) this.potionOverlap.destroy();
+
         this.wallCollider = this.physics.add.collider(this.player, this.wallsGroup);
         this.enemyOverlap = this.physics.add.overlap(this.player, this.enemies, this.onEnemyCollision, null, this);
         this.doorOverlap = this.physics.add.overlap(this.player, this.doorsGroup, this.onDoorCollision, null, this);
+        this.potionOverlap = this.physics.add.overlap(this.player, this.potions, this.onPotionPickup, null, this);
     }
 
     getOppositePosition(fromDirection) {
@@ -220,6 +246,38 @@ export class GameScene extends Scene {
             default:
                 return { x: centerX, y: centerY };
         }
+    }
+
+    onPotionPickup(player, potion) {
+        // Prevent double pickup
+        if (potion.getData('collected')) return;
+        potion.setData('collected', true);
+
+        this.player.heal(25);
+        this.scene.get("HudScene").updateHealth(this.player.currentHp, this.player.maxHp);
+
+        // Floating "+25 PV" text
+        const healText = this.add.bitmapText(potion.x, potion.y - 10, 'pixelfont', '+25 PV', 16);
+        healText.setTint(0x44ff44);
+        healText.setDepth(20);
+        healText.setOrigin(0.5);
+        this.tweens.add({
+            targets: healText,
+            y: healText.y - 40,
+            alpha: 0,
+            duration: 800,
+            onComplete: () => healText.destroy()
+        });
+
+        // Pickup animation
+        this.tweens.add({
+            targets: potion,
+            y: potion.y - 30,
+            alpha: 0,
+            scale: 1.5,
+            duration: 400,
+            onComplete: () => potion.destroy()
+        });
     }
 
     update() {

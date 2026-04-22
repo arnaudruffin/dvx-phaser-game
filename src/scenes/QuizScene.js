@@ -2,107 +2,483 @@ import { Scene } from "phaser";
 import { QuizManager } from "../systems/QuizManager";
 
 export class QuizScene extends Scene {
-    quizManager = null;
-    currentAnswer = "";
-    answerText = null;
-    questionText = null;
-    feedbackText = null;
-    
     constructor() {
         super("QuizScene");
     }
 
-    create() {
-        this.quizManager = new QuizManager();
+    init(data) {
+        this.playerHp = data.playerHp;
+        this.playerMaxHp = data.playerMaxHp;
+        this.enemyType = data.enemyType;
+        this.enemyConfig = data.enemyConfig;
+        this.enemyHp = data.enemyCurrentHp;
+        this.enemyMaxHp = data.enemyConfig.maxHp;
+
+        this.quizManager = new QuizManager(data.enemyConfig.minTable, data.enemyConfig.maxTable);
+
+        this.currentRound = 0;
+        this.maxRounds = data.enemyConfig.rounds;
+        this.totalScore = 0;
         this.currentAnswer = "";
-        
-        const centerX = this.scale.width / 2;
-        const centerY = this.scale.height / 2;
-        
-        // Dark overlay
-        this.add.rectangle(0, 0, this.scale.width, this.scale.height, 0x000000, 0.8)
-            .setOrigin(0, 0);
-        
-        // Quiz panel
-        this.add.rectangle(centerX, centerY, 400, 250, 0x2d2d44)
-            .setStrokeStyle(4, 0x6666aa);
-        
-        // Monster icon
-        this.add.image(centerX, centerY - 90, 'enemy').setScale(2);
-        
-        // Question
-        const question = this.quizManager.generateQuestion();
-        this.questionText = this.add.bitmapText(centerX, centerY - 30, "pixelfont", question.text, 32)
-            .setOrigin(0.5, 0.5);
-        
-        // Store correct answer
-        this.correctAnswer = question.answer;
-        
-        // Answer input display
-        this.add.rectangle(centerX, centerY + 30, 150, 50, 0x1a1a2e)
-            .setStrokeStyle(2, 0xffffff);
-        
-        this.answerText = this.add.bitmapText(centerX, centerY + 30, "pixelfont", "_", 36)
-            .setOrigin(0.5, 0.5);
-        
-        // Instructions
-        this.add.bitmapText(centerX, centerY + 80, "pixelfont", "TAPE TA REPONSE", 16)
-            .setOrigin(0.5, 0.5);
-        this.add.bitmapText(centerX, centerY + 100, "pixelfont", "ENTREE POUR VALIDER", 16)
-            .setOrigin(0.5, 0.5);
-        
-        // Feedback text (hidden initially)
-        this.feedbackText = this.add.bitmapText(centerX, centerY + 130, "pixelfont", "", 20)
-            .setOrigin(0.5, 0.5);
-        
-        // Keyboard input
+        this.inputEnabled = false;
+        this.lastAnswerCorrect = true;
+        this.state = 'intro';
+    }
+
+    create() {
+        const W = this.scale.width;
+        const H = this.scale.height;
+
+        // Dark background
+        this.add.rectangle(0, 0, W, H, 0x0a0a1a).setOrigin(0, 0).setDepth(0);
+
+        // --- Player sprite (left side) ---
+        this.playerSprite = this.add.image(-80, 180, 'player').setScale(3).setDepth(2);
+        this.playerBaseX = 150;
+
+        // --- Enemy sprite (right side) ---
+        this.enemySprite = this.add.image(W + 80, 180, this.enemyConfig.texture).setScale(3).setDepth(2);
+        this.enemyBaseX = 650;
+
+        // --- Player HP bar ---
+        this.createHpBar(80, 260, 180, 'player');
+        // --- Enemy HP bar ---
+        this.createHpBar(540, 260, 180, 'enemy');
+
+        // Names
+        this.add.bitmapText(150, 295, "pixelfont", "CHEVALIER", 16).setOrigin(0.5, 0).setDepth(5);
+        this.add.bitmapText(650, 295, "pixelfont", this.enemyConfig.name.toUpperCase(), 16).setOrigin(0.5, 0).setDepth(5);
+
+        // --- Question panel (hidden initially) ---
+        this.questionPanel = this.add.rectangle(W / 2, 400, 400, 200, 0x2d2d44)
+            .setStrokeStyle(3, 0x6666aa).setDepth(5).setAlpha(0);
+
+        this.questionText = this.add.bitmapText(W / 2, 350, "pixelfont", "", 32)
+            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+
+        // Answer input box
+        this.answerBox = this.add.rectangle(W / 2, 410, 150, 50, 0x1a1a2e)
+            .setStrokeStyle(2, 0xffffff).setDepth(6).setAlpha(0);
+        this.answerText = this.add.bitmapText(W / 2, 410, "pixelfont", "_", 36)
+            .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0);
+
+        this.instructionText = this.add.bitmapText(W / 2, 460, "pixelfont", "TAPE TA REPONSE", 16)
+            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+
+        // --- Round counter (bottom-left) ---
+        this.roundText = this.add.bitmapText(20, H - 30, "pixelfont", "", 18)
+            .setDepth(5).setAlpha(0);
+
+        // --- Feedback text (reusable, hidden) ---
+        this.feedbackText = this.add.bitmapText(W / 2, H - 30, "pixelfont", "", 20)
+            .setOrigin(0.5, 0.5).setDepth(10).setAlpha(0);
+
+        // Keyboard
         this.input.keyboard.on('keydown', this.handleKeyInput, this);
+
+        // Start intro
+        this.playIntro();
     }
 
-    handleKeyInput(event) {
-        const key = event.key;
-        
-        // Numbers
-        if (/^[0-9]$/.test(key) && this.currentAnswer.length < 3) {
-            this.currentAnswer += key;
-            this.updateAnswerDisplay();
+    // ---- HP BAR SYSTEM ----
+    createHpBar(x, y, width, who) {
+        const barHeight = 16;
+        const bg = this.add.rectangle(x, y, width, barHeight, 0x333333).setOrigin(0, 0.5).setDepth(4);
+        const fg = this.add.rectangle(x, y, width, barHeight, 0x44cc44).setOrigin(0, 0.5).setDepth(5);
+
+        const hp = who === 'player' ? this.playerHp : this.enemyHp;
+        const maxHp = who === 'player' ? this.playerMaxHp : this.enemyMaxHp;
+        const txt = this.add.bitmapText(x + width / 2, y, "pixelfont", `PV:${hp}/${maxHp}`, 14)
+            .setOrigin(0.5, 0.5).setDepth(6);
+
+        if (who === 'player') {
+            this.playerHpBg = bg;
+            this.playerHpFg = fg;
+            this.playerHpText = txt;
+            this.playerHpBarWidth = width;
+        } else {
+            this.enemyHpBg = bg;
+            this.enemyHpFg = fg;
+            this.enemyHpText = txt;
+            this.enemyHpBarWidth = width;
         }
-        
-        // Backspace
-        if (key === 'Backspace' && this.currentAnswer.length > 0) {
-            this.currentAnswer = this.currentAnswer.slice(0, -1);
-            this.updateAnswerDisplay();
-        }
-        
-        // Enter to submit
-        if (key === 'Enter' && this.currentAnswer.length > 0) {
-            this.submitAnswer();
-        }
+        this.updateHpBarColor(fg, hp / maxHp);
     }
 
-    updateAnswerDisplay() {
-        this.answerText.setText(this.currentAnswer || "_");
+    updateHpBar(who, currentHp, maxHp) {
+        const ratio = Math.max(0, currentHp / maxHp);
+        const fg = who === 'player' ? this.playerHpFg : this.enemyHpFg;
+        const txt = who === 'player' ? this.playerHpText : this.enemyHpText;
+        const barWidth = who === 'player' ? this.playerHpBarWidth : this.enemyHpBarWidth;
+
+        this.tweens.add({
+            targets: fg,
+            displayWidth: barWidth * ratio,
+            duration: 400,
+            ease: 'Power2'
+        });
+        this.updateHpBarColor(fg, ratio);
+        txt.setText(`PV:${currentHp}/${maxHp}`);
+    }
+
+    updateHpBarColor(bar, ratio) {
+        if (ratio > 0.6) bar.setFillStyle(0x44cc44);
+        else if (ratio > 0.3) bar.setFillStyle(0xcccc44);
+        else bar.setFillStyle(0xcc4444);
+    }
+
+    // ---- STATE MACHINE ----
+
+    playIntro() {
+        this.state = 'intro';
+
+        // Slide sprites in
+        this.tweens.add({
+            targets: this.playerSprite,
+            x: this.playerBaseX,
+            duration: 500,
+            ease: 'Back.easeOut'
+        });
+        this.tweens.add({
+            targets: this.enemySprite,
+            x: this.enemyBaseX,
+            duration: 500,
+            ease: 'Back.easeOut'
+        });
+
+        // Big "COMBAT!" text
+        const combatText = this.add.bitmapText(this.scale.width / 2, 180, "pixelfont", "COMBAT!", 48)
+            .setOrigin(0.5, 0.5).setDepth(20).setScale(2).setAlpha(0);
+
+        this.tweens.add({
+            targets: combatText,
+            scale: 1,
+            alpha: 1,
+            duration: 400,
+            ease: 'Back.easeOut',
+            onComplete: () => {
+                this.time.delayedCall(400, () => {
+                    this.tweens.add({
+                        targets: combatText,
+                        alpha: 0,
+                        duration: 300,
+                        onComplete: () => {
+                            combatText.destroy();
+                            this.startNextRound();
+                        }
+                    });
+                });
+            }
+        });
+    }
+
+    startNextRound() {
+        this.currentRound++;
+
+        if (this.enemyHp <= 0) {
+            this.playVictory();
+            return;
+        }
+        if (this.playerHp <= 0) {
+            this.playDefeat();
+            return;
+        }
+        if (this.currentRound > this.maxRounds) {
+            // Rounds exhausted — enemy survives
+            this.endCombat(false);
+            return;
+        }
+
+        this.roundText.setText(`ROUND ${this.currentRound}/${this.maxRounds}`).setAlpha(1);
+        this.showQuestion();
+    }
+
+    showQuestion() {
+        this.state = 'question';
+        this.currentQuestion = this.quizManager.generateQuestion();
+        this.currentAnswer = "";
+        this.questionStartTime = this.time.now;
+
+        // Show panel elements
+        this.questionPanel.setAlpha(1);
+        this.questionText.setText(this.currentQuestion.text).setAlpha(1);
+        this.answerBox.setAlpha(1);
+        this.answerText.setText("_").setAlpha(1);
+        this.instructionText.setAlpha(1);
+        this.feedbackText.setAlpha(0);
+
+        this.inputEnabled = true;
+    }
+
+    hideQuestion() {
+        this.inputEnabled = false;
+        this.questionPanel.setAlpha(0);
+        this.questionText.setAlpha(0);
+        this.answerBox.setAlpha(0);
+        this.answerText.setAlpha(0);
+        this.instructionText.setAlpha(0);
     }
 
     submitAnswer() {
-        const isCorrect = parseInt(this.currentAnswer) === this.correctAnswer;
-        
+        if (this.state !== 'question' || !this.inputEnabled) return;
+        this.inputEnabled = false;
+
+        const elapsed = (this.time.now - this.questionStartTime) / 1000;
+        const isCorrect = this.quizManager.checkAnswer(this.currentQuestion, this.currentAnswer);
+        const result = this.quizManager.calculateDamage(elapsed, isCorrect);
+        this.lastAnswerCorrect = isCorrect;
+
         if (isCorrect) {
-            this.feedbackText.setText("BRAVO!");
-            this.feedbackText.setTint(0x44ff44);
-        } else {
-            this.feedbackText.setText(`NON! C'ETAIT ${this.correctAnswer}`);
-            this.feedbackText.setTint(0xff4444);
+            this.totalScore += this.quizManager.calculateTimeBonus(elapsed);
         }
-        
-        // Disable further input
-        this.input.keyboard.off('keydown', this.handleKeyInput, this);
-        
-        // Close after delay
-        this.time.delayedCall(isCorrect ? 500 : 1500, () => {
-            this.game.events.emit("quiz-answer", { correct: isCorrect });
-            this.scene.stop();
+
+        this.hideQuestion();
+        this.playPlayerAttack(result);
+    }
+
+    // ---- ATTACK ANIMATIONS ----
+
+    playPlayerAttack(result) {
+        this.state = 'player_attack';
+        const targetX = this.playerBaseX + 60;
+
+        // Lunge toward enemy
+        this.tweens.add({
+            targets: this.playerSprite,
+            x: targetX,
+            duration: 200,
+            ease: 'Power2',
+            yoyo: true,
+            onYoyo: () => {
+                // Apply damage to enemy
+                this.enemyHp = Math.max(0, this.enemyHp - result.damage);
+                this.updateHpBar('enemy', this.enemyHp, this.enemyMaxHp);
+
+                // Flash enemy red
+                this.flashSprite(this.enemySprite);
+
+                // Show damage tier feedback
+                this.showDamageTier(result, this.enemyBaseX, 130);
+
+                // Screen shake on critical
+                if (result.tier === 'critical') {
+                    this.cameras.main.shake(200, 0.01);
+                }
+            },
+            onComplete: () => {
+                // After player attack, enemy attacks
+                this.time.delayedCall(800, () => {
+                    if (this.enemyHp <= 0) {
+                        this.playVictory();
+                    } else {
+                        this.playEnemyAttack();
+                    }
+                });
+            }
         });
+    }
+
+    playEnemyAttack() {
+        this.state = 'enemy_attack';
+        const targetX = this.enemyBaseX - 60;
+        let dmg = this.enemyConfig.damage;
+
+        // Double damage if player got last answer wrong
+        if (!this.lastAnswerCorrect) {
+            dmg *= 2;
+        }
+
+        this.tweens.add({
+            targets: this.enemySprite,
+            x: targetX,
+            duration: 200,
+            ease: 'Power2',
+            yoyo: true,
+            onYoyo: () => {
+                this.playerHp = Math.max(0, this.playerHp - dmg);
+                this.updateHpBar('player', this.playerHp, this.playerMaxHp);
+
+                this.flashSprite(this.playerSprite);
+                this.showFloatingDamage(`-${dmg}`, this.playerBaseX, 130, 0xff4444);
+            },
+            onComplete: () => {
+                this.time.delayedCall(500, () => {
+                    if (this.playerHp <= 0) {
+                        this.playDefeat();
+                    } else {
+                        this.startNextRound();
+                    }
+                });
+            }
+        });
+    }
+
+    // ---- VISUAL EFFECTS ----
+
+    flashSprite(sprite) {
+        sprite.setTint(0xff0000);
+        this.time.delayedCall(150, () => {
+            sprite.clearTint();
+        });
+    }
+
+    showDamageTier(result, x, y) {
+        let text, color, fontSize;
+
+        switch (result.tier) {
+            case 'critical':
+                text = `CRITIQUE! -${result.damage}`;
+                color = 0xffd700;
+                fontSize = 28;
+                break;
+            case 'strong':
+                text = `BON COUP! -${result.damage}`;
+                color = 0xffffff;
+                fontSize = 24;
+                break;
+            case 'normal':
+                text = `-${result.damage}`;
+                color = 0xaaaaaa;
+                fontSize = 22;
+                break;
+            case 'weak':
+                text = `FAIBLE... -${result.damage}`;
+                color = 0x888888;
+                fontSize = 18;
+                break;
+            case 'miss':
+                text = "RATE!";
+                color = 0xff4444;
+                fontSize = 24;
+                break;
+        }
+
+        const dmgText = this.add.bitmapText(x, y, "pixelfont", text, fontSize)
+            .setOrigin(0.5, 0.5).setTint(color).setDepth(15);
+
+        // Scale bounce for critical
+        if (result.tier === 'critical') {
+            dmgText.setScale(2);
+            this.tweens.add({
+                targets: dmgText,
+                scale: 1,
+                duration: 300,
+                ease: 'Bounce.easeOut'
+            });
+        }
+
+        // Float up and fade
+        this.tweens.add({
+            targets: dmgText,
+            y: y - 40,
+            alpha: 0,
+            duration: 800,
+            delay: result.tier === 'critical' ? 300 : 0,
+            onComplete: () => dmgText.destroy()
+        });
+    }
+
+    showFloatingDamage(text, x, y, color) {
+        const dmgText = this.add.bitmapText(x, y, "pixelfont", text, 22)
+            .setOrigin(0.5, 0.5).setTint(color).setDepth(15);
+
+        this.tweens.add({
+            targets: dmgText,
+            y: y - 40,
+            alpha: 0,
+            duration: 800,
+            onComplete: () => dmgText.destroy()
+        });
+    }
+
+    // ---- END STATES ----
+
+    playVictory() {
+        this.state = 'victory';
+        this.totalScore += this.enemyConfig.scoreValue;
+
+        // Enemy explodes
+        this.tweens.add({
+            targets: this.enemySprite,
+            scale: 6,
+            alpha: 0,
+            duration: 600,
+            ease: 'Power2'
+        });
+
+        const vicText = this.add.bitmapText(this.scale.width / 2, 180, "pixelfont", "VICTOIRE!", 40)
+            .setOrigin(0.5, 0.5).setTint(0xffd700).setDepth(20).setAlpha(0);
+
+        const scoreText = this.add.bitmapText(this.scale.width / 2, 230, "pixelfont", `+${this.totalScore} PTS`, 24)
+            .setOrigin(0.5, 0.5).setTint(0xffd700).setDepth(20).setAlpha(0);
+
+        this.tweens.add({
+            targets: vicText,
+            alpha: 1,
+            scale: { from: 2, to: 1 },
+            duration: 400,
+            ease: 'Back.easeOut'
+        });
+        this.tweens.add({
+            targets: scoreText,
+            alpha: 1,
+            duration: 400,
+            delay: 300
+        });
+
+        this.time.delayedCall(1500, () => this.endCombat(true));
+    }
+
+    playDefeat() {
+        this.state = 'defeat';
+
+        this.tweens.add({
+            targets: this.playerSprite,
+            alpha: 0,
+            duration: 600
+        });
+
+        const defText = this.add.bitmapText(this.scale.width / 2, 180, "pixelfont", "DEFAITE...", 40)
+            .setOrigin(0.5, 0.5).setTint(0xff4444).setDepth(20).setAlpha(0);
+
+        this.tweens.add({
+            targets: defText,
+            alpha: 1,
+            duration: 400
+        });
+
+        this.time.delayedCall(1500, () => this.endCombat(false));
+    }
+
+    endCombat(enemyDefeated) {
+        this.game.events.emit("quiz-answer", {
+            correct: enemyDefeated,
+            playerHpRemaining: this.playerHp,
+            score: this.totalScore,
+            enemyDefeated: enemyDefeated
+        });
+        this.scene.stop();
+    }
+
+    // ---- INPUT ----
+
+    handleKeyInput(event) {
+        if (!this.inputEnabled) return;
+        const key = event.key;
+
+        if (/^[0-9]$/.test(key) && this.currentAnswer.length < 3) {
+            this.currentAnswer += key;
+            this.answerText.setText(this.currentAnswer);
+        }
+
+        if (key === 'Backspace' && this.currentAnswer.length > 0) {
+            this.currentAnswer = this.currentAnswer.slice(0, -1);
+            this.answerText.setText(this.currentAnswer || "_");
+        }
+
+        if (key === 'Enter' && this.currentAnswer.length > 0) {
+            this.submitAnswer();
+        }
     }
 
     shutdown() {

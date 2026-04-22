@@ -168,5 +168,16 @@ export class Preloader extends Phaser.Scene {
         doorGraphics.fillStyle(0xffd700);
         doorGraphics.fillCircle(24, 16, 3); // handle
         doorGraphics.generateTexture('door-tile', tileSize, tileSize);
+
+        // Potion - red heart with shine
+        const potionGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        potionGfx.fillStyle(0xff4466);
+        potionGfx.fillCircle(10, 12, 7); // left lobe
+        potionGfx.fillCircle(22, 12, 7); // right lobe
+        potionGfx.fillTriangle(4, 14, 28, 14, 16, 28); // bottom point
+        potionGfx.fillRect(10, 10, 12, 8); // fill center gap
+        potionGfx.fillStyle(0xff8899);
+        potionGfx.fillCircle(9, 10, 3); // shine highlight
+        potionGfx.generateTexture('potion', tileSize, tileSize);
     }
 }

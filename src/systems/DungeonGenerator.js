@@ -99,12 +99,38 @@ export class DungeonGenerator {
             }
         }
 
+        // Generate potion positions (0-1 per room, ~30% chance, not in start room)
+        const potionPositions = [];
+        if (!isStartRoom && Math.random() < 0.3) {
+            let attempts = 0;
+            while (attempts < 20) {
+                const px = Math.floor(Math.random() * (this.roomWidth - 4)) + 2;
+                const py = Math.floor(Math.random() * (this.roomHeight - 4)) + 2;
+
+                if (tiles[py][px] === 0 && (Math.abs(px - midX) > 2 || Math.abs(py - midY) > 2)) {
+                    const posX = px * this.tileSize + this.tileSize / 2;
+                    const posY = py * this.tileSize + this.tileSize / 2;
+
+                    const tooCloseToEnemy = enemyPositions.some(pos =>
+                        Math.abs(pos.x - posX) < this.tileSize && Math.abs(pos.y - posY) < this.tileSize
+                    );
+
+                    if (!tooCloseToEnemy) {
+                        potionPositions.push({ x: posX, y: posY });
+                        break;
+                    }
+                }
+                attempts++;
+            }
+        }
+
         const room = {
             x: x,
             y: y,
             key: key,
             tiles: tiles,
-            enemyPositions: enemyPositions
+            enemyPositions: enemyPositions,
+            potionPositions: potionPositions
         };
 
         this.rooms.set(key, room);
