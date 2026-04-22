@@ -53,21 +53,21 @@ export class QuizScene extends Scene {
         this.playerNameText = this.add.bitmapText(W * 0.2, H * 0.52, "pixelfont", "CHEVALIER", 16).setOrigin(0.5, 0).setDepth(5);
         this.enemyNameText = this.add.bitmapText(W * 0.8, H * 0.52, "pixelfont", this.enemyConfig.name.toUpperCase(), 16).setOrigin(0.5, 0).setDepth(5);
 
-        // --- Question panel (hidden initially) ---
+        // --- Question panel (hidden initially, above HP bars) ---
         this.questionPanel = this.add.rectangle(W / 2, H * 0.55, W * 0.6, H * 0.3, 0x2d2d44)
-            .setStrokeStyle(3, 0x6666aa).setDepth(5).setAlpha(0);
+            .setStrokeStyle(3, 0x6666aa).setDepth(10).setAlpha(0);
 
         this.questionText = this.add.bitmapText(W / 2, H * 0.48, "pixelfont", "", 32)
-            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(11).setAlpha(0);
 
         // Answer input box
         this.answerBox = this.add.rectangle(W / 2, H * 0.57, W * 0.25, H * 0.08, 0x1a1a2e)
-            .setStrokeStyle(2, 0xffffff).setDepth(6).setAlpha(0);
+            .setStrokeStyle(2, 0xffffff).setDepth(11).setAlpha(0);
         this.answerText = this.add.bitmapText(W / 2, H * 0.57, "pixelfont", "_", 36)
-            .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(12).setAlpha(0);
 
         this.instructionText = this.add.bitmapText(W / 2, H * 0.67, "pixelfont", "TAPE TA REPONSE", 16)
-            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(11).setAlpha(0);
 
         // --- Round counter (bottom-left) ---
         this.roundText = this.add.bitmapText(20, H - 30, "pixelfont", "", 18)
