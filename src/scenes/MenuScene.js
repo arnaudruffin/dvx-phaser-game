@@ -58,19 +58,19 @@ export class MenuScene extends Scene {
         });
 
         // Epic subtitle
-        const subtitle = this.add.bitmapText(centerX, centerY - 10, "pixelfont", "L'EPREUVE DES MONSTRES", 16)
-            .setOrigin(0.5, 0.5)
-            .setAlpha(0)
-            .setDepth(5);
-        subtitle.setTint(0xff6633);
+        // const subtitle = this.add.bitmapText(centerX, centerY - 10, "pixelfont", "L'EPREUVE DES MONSTRES", 16)
+        //     .setOrigin(0.5, 0.5)
+        //     .setAlpha(0)
+        //     .setDepth(5);
+        // subtitle.setTint(0xff6633);
 
-        this.tweens.add({
-            targets: subtitle,
-            alpha: { from: 0, to: 0.9 },
-            duration: 1000,
-            delay: 400,
-            ease: 'power2.inout'
-        });
+        // this.tweens.add({
+        //     targets: subtitle,
+        //     alpha: { from: 0, to: 0.9 },
+        //     duration: 1000,
+        //     delay: 400,
+        //     ease: 'power2.inout'
+        // });
 
         // Instructions background
         this.add.rectangle(0, centerY + 80, this.scale.width, 100, 0x000000)

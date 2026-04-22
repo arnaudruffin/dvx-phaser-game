@@ -33,4 +33,20 @@ export class QuizManager {
         if (elapsedSeconds > 10) return 10;
         return Math.floor(50 - (elapsedSeconds - 2) * 5);
     }
+
+    // Defense timing validation
+    checkDefenseTiming(windowStartMs, windowEndMs, playerInputTimeMs) {
+        return playerInputTimeMs >= windowStartMs && playerInputTimeMs <= windowEndMs;
+    }
+
+    calculateDefenseWindow(totalDefenseDurationMs = 600) {
+        // Center the window: player has 300ms before and 300ms after the "perfect" moment
+        const perfectMoment = totalDefenseDurationMs / 2;
+        const margin = 150; // ±150ms tolerance
+        return {
+            windowStart: perfectMoment - margin,
+            windowEnd: perfectMoment + margin,
+            perfectMoment
+        };
+    }
 }

@@ -66,6 +66,12 @@ export class SoundManager {
                 case 'enemy-attack':
                     this.playEnemyAttack(volume);
                     break;
+                case 'defense-success':
+                    this.playDefenseSuccess(volume);
+                    break;
+                case 'defense-fail':
+                    this.playDefenseFail(volume);
+                    break;
                 case 'victory':
                     this.playVictory(volume);
                     break;
@@ -374,6 +380,54 @@ export class SoundManager {
         osc.frequency.exponentialRampToValueAtTime(200, now + duration);
 
         gain.gain.setValueAtTime(volume * 0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+        osc.start(now);
+        osc.stop(now + duration);
+    }
+
+    playDefenseSuccess(volume) {
+        const ctx = this.scene.sound.context;
+        const now = ctx.currentTime;
+        const notes = [659.25, 783.99, 987.77]; // E5, G5, B5 - ascending bright tones
+        
+        notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            const start = now + (i * 0.06);
+            const duration = 0.12;
+
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.frequency.setValueAtTime(freq, start);
+            gain.gain.setValueAtTime(volume * 0.4, start);
+            gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+
+            osc.start(start);
+            osc.stop(start + duration);
+        });
+    }
+
+    playDefenseFail(volume) {
+        const ctx = this.scene.sound.context;
+        const now = ctx.currentTime;
+        const duration = 0.25;
+
+        // Single low buzzy tone
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'square';
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.frequency.setValueAtTime(200, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + duration);
+
+        gain.gain.setValueAtTime(volume * 0.3, now);
         gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
 
         osc.start(now);

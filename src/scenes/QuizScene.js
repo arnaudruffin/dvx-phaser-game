@@ -23,6 +23,13 @@ export class QuizScene extends Scene {
         this.inputEnabled = false;
         this.lastAnswerCorrect = true;
         this.state = 'intro';
+
+        // Defense timing variables
+        this.isDefensePhase = false;
+        this.playerDefended = false;
+        this.defenseStartTime = 0;
+        this.defenseDuration = 600; // ms
+        this.defenseKeyPressed = false;
     }
 
     create() {
@@ -77,6 +84,36 @@ export class QuizScene extends Scene {
         this.feedbackText = this.add.bitmapText(W / 2, H - 30, "pixelfont", "", 20)
             .setOrigin(0.5, 0.5).setDepth(10).setAlpha(0);
 
+        // --- Defense timing UI (hidden by default) ---
+        this.defenseText = this.add.bitmapText(W / 2, H * 0.25, "pixelfont", "DEFEND!", 48)
+            .setOrigin(0.5, 0.5).setDepth(8).setAlpha(0);
+        
+        // Timing bar dimensions
+        this.timingBarWidth = 300;
+        this.timingBarHeight = 30;
+        
+        // Timing bar background
+        this.timingBarBg = this.add.rectangle(W / 2, H * 0.35, this.timingBarWidth, this.timingBarHeight, 0x333333)
+            .setOrigin(0.5, 0.5).setDepth(7).setStrokeStyle(2, 0xffffff).setAlpha(0);
+        
+        // Timing bar progress (filled) - left-aligned within background
+        this.timingBar = this.add.rectangle(
+            W / 2 - this.timingBarWidth / 2, 
+            H * 0.35, 
+            this.timingBarWidth, 
+            this.timingBarHeight, 
+            0x00ff00
+        ).setOrigin(0, 0.5).setDepth(8).setAlpha(0);
+        
+        // Success window marker (visual indicator)
+        this.successWindowMarker = this.add.rectangle(
+            W / 2, 
+            H * 0.35,
+            150,  // Success window width (±75ms from 300ms total)
+            this.timingBarHeight,
+            0x44ff44
+        ).setOrigin(0.5, 0.5).setDepth(7).setAlpha(0.2);
+
         // Keyboard
         this.input.keyboard.on('keydown', this.handleKeyInput, this);
 
@@ -112,6 +149,12 @@ export class QuizScene extends Scene {
         if (this.answerText) this.answerText.setPosition(gameSize.width / 2, gameSize.height * 0.57);
         if (this.instructionText) this.instructionText.setPosition(gameSize.width / 2, gameSize.height * 0.67);
         if (this.feedbackText) this.feedbackText.setPosition(gameSize.width / 2, gameSize.height - 30);
+        
+        // Update defense UI positions
+        if (this.defenseText) this.defenseText.setPosition(gameSize.width / 2, gameSize.height * 0.25);
+        if (this.timingBarBg) this.timingBarBg.setPosition(gameSize.width / 2, gameSize.height * 0.35);
+        if (this.timingBar) this.timingBar.setPosition(gameSize.width / 2 - this.timingBarWidth / 2, gameSize.height * 0.35);
+        if (this.successWindowMarker) this.successWindowMarker.setPosition(gameSize.width / 2, gameSize.height * 0.35);
     }
 
     // ---- HP BAR SYSTEM ----
@@ -361,11 +404,8 @@ export class QuizScene extends Scene {
             ease: 'Power2',
             yoyo: true,
             onYoyo: () => {
-                this.playerHp = Math.max(0, this.playerHp - dmg);
-                this.updateHpBar('player', this.playerHp, this.playerMaxHp);
-
-                this.flashSprite(this.playerSprite);
-                this.showFloatingDamage(`-${dmg}`, this.playerBaseX, 130, 0xff4444);
+                // Start defense phase when enemy attacks
+                this.startDefensePhase(dmg);
             },
             onComplete: () => {
                 this.time.delayedCall(500, () => {
@@ -377,6 +417,69 @@ export class QuizScene extends Scene {
                 });
             }
         });
+    }
+
+    startDefensePhase(damageToBlock) {
+        this.isDefensePhase = true;
+        this.playerDefended = false;
+        this.defenseKeyPressed = false;
+        this.defenseStartTime = this.time.now;
+
+        // Show defense UI
+        this.defenseText.setAlpha(1);
+        this.timingBarBg.setAlpha(1);
+        this.successWindowMarker.setAlpha(0.2);  // Show success window
+        this.timingBar.setAlpha(1).setDisplayWidth(this.timingBarWidth);
+
+        // Animate timing bar emptying over defenseDuration milliseconds
+        this.tweens.add({
+            targets: this.timingBar,
+            displayWidth: 0,
+            duration: this.defenseDuration,
+            ease: 'Linear'
+        });
+
+        // Check defense result after duration
+        this.time.delayedCall(this.defenseDuration, () => {
+            this.endDefensePhase(damageToBlock);
+        });
+    }
+
+    endDefensePhase(damageToBlock) {
+        this.isDefensePhase = false;
+        this.defenseKeyPressed = false;
+
+        // Hide defense UI
+        this.defenseText.setAlpha(0);
+        this.timingBarBg.setAlpha(0);
+        this.timingBar.setAlpha(0);
+        this.successWindowMarker.setAlpha(0);
+
+        let actualDamage = damageToBlock;
+        let feedbackText = '';
+        let feedbackColor = 0xff4444;
+
+        if (this.playerDefended) {
+            actualDamage = 0;
+            feedbackText = 'BLOQUE!';
+            feedbackColor = 0x44ff44;
+        } else {
+            feedbackText = 'RATE!';
+            feedbackColor = 0xff4444;
+        }
+
+        // Apply damage
+        this.playerHp = Math.max(0, this.playerHp - actualDamage);
+        this.updateHpBar('player', this.playerHp, this.playerMaxHp);
+
+        // Flash sprite and show feedback
+        this.flashSprite(this.playerSprite);
+        this.showFloatingDamage(
+            actualDamage === 0 ? feedbackText : `-${actualDamage}`,
+            this.playerBaseX,
+            130,
+            feedbackColor
+        );
     }
 
     // ---- VISUAL EFFECTS ----
@@ -539,6 +642,31 @@ export class QuizScene extends Scene {
     // ---- INPUT ----
 
     handleKeyInput(event) {
+        // Handle defense phase
+        if (this.isDefensePhase) {
+            if (event.key === 'Enter' && !this.defenseKeyPressed) {
+                this.defenseKeyPressed = true;
+                const elapsedMs = this.time.now - this.defenseStartTime;
+                const defenseWindow = this.quizManager.calculateDefenseWindow(this.defenseDuration);
+                const isDefenseSuccess = this.quizManager.checkDefenseTiming(
+                    defenseWindow.windowStart,
+                    defenseWindow.windowEnd,
+                    elapsedMs
+                );
+                this.playerDefended = isDefenseSuccess;
+
+                // Play sound IMMEDIATELY on input
+                if (this.game.soundManager) {
+                    if (isDefenseSuccess) {
+                        this.game.soundManager.playSound('defense-success');
+                    } else {
+                        this.game.soundManager.playSound('defense-fail');
+                    }
+                }
+            }
+            return;
+        }
+
         if (!this.inputEnabled) return;
         const key = event.key;
 
