@@ -40,9 +40,7 @@ export class GameScene extends Scene {
         this.player = new Player(this, startX, startY);
         
         // Setup collisions
-        this.physics.add.collider(this.player, this.wallsGroup);
-        this.physics.add.overlap(this.player, this.enemies, this.onEnemyCollision, null, this);
-        this.physics.add.overlap(this.player, this.doorsGroup, this.onDoorCollision, null, this);
+        this.setupCollisions();
         
         // Input
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -172,9 +170,18 @@ export class GameScene extends Scene {
         this.scene.get("HudScene").updateRoom(`${newRoomX},${newRoomY}`);
         
         // Re-setup collisions
-        this.physics.add.collider(this.player, this.wallsGroup);
-        this.physics.add.overlap(this.player, this.enemies, this.onEnemyCollision, null, this);
-        this.physics.add.overlap(this.player, this.doorsGroup, this.onDoorCollision, null, this);
+        this.setupCollisions();
+    }
+
+    setupCollisions() {
+        // Remove old colliders to avoid stale references after room transitions
+        if (this.wallCollider) this.wallCollider.destroy();
+        if (this.enemyOverlap) this.enemyOverlap.destroy();
+        if (this.doorOverlap) this.doorOverlap.destroy();
+
+        this.wallCollider = this.physics.add.collider(this.player, this.wallsGroup);
+        this.enemyOverlap = this.physics.add.overlap(this.player, this.enemies, this.onEnemyCollision, null, this);
+        this.doorOverlap = this.physics.add.overlap(this.player, this.doorsGroup, this.onDoorCollision, null, this);
     }
 
     getOppositePosition(fromDirection) {
