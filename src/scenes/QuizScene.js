@@ -132,6 +132,11 @@ export class QuizScene extends Scene {
     playIntro() {
         this.state = 'intro';
 
+        // Play combat start sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('combat-start');
+        }
+
         // Slide sprites in
         this.tweens.add({
             targets: this.playerSprite,
@@ -228,6 +233,23 @@ export class QuizScene extends Scene {
         const result = this.quizManager.calculateDamage(elapsed, isCorrect);
         this.lastAnswerCorrect = isCorrect;
 
+        // Play answer sound
+        if (this.game.soundManager) {
+            if (isCorrect) {
+                if (result.tier === 'critical') {
+                    this.game.soundManager.playSound('answer-critical');
+                } else if (result.tier === 'strong') {
+                    this.game.soundManager.playSound('answer-good');
+                } else if (result.tier === 'normal') {
+                    this.game.soundManager.playSound('answer-normal');
+                } else if (result.tier === 'weak') {
+                    this.game.soundManager.playSound('answer-weak');
+                }
+            } else {
+                this.game.soundManager.playSound('answer-wrong');
+            }
+        }
+
         if (isCorrect) {
             this.totalScore += this.quizManager.calculateTimeBonus(elapsed);
         }
@@ -241,6 +263,11 @@ export class QuizScene extends Scene {
     playPlayerAttack(result) {
         this.state = 'player_attack';
         const targetX = this.playerBaseX + 60;
+
+        // Play attack sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('player-attack');
+        }
 
         // Lunge toward enemy
         this.tweens.add({
@@ -286,6 +313,11 @@ export class QuizScene extends Scene {
         // Double damage if player got last answer wrong
         if (!this.lastAnswerCorrect) {
             dmg *= 2;
+        }
+
+        // Play enemy attack sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('enemy-attack');
         }
 
         this.tweens.add({
@@ -397,6 +429,11 @@ export class QuizScene extends Scene {
         this.state = 'victory';
         this.totalScore += this.enemyConfig.scoreValue;
 
+        // Play victory sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('victory');
+        }
+
         // Enemy explodes
         this.tweens.add({
             targets: this.enemySprite,
@@ -431,6 +468,11 @@ export class QuizScene extends Scene {
 
     playDefeat() {
         this.state = 'defeat';
+
+        // Play defeat sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('defeat');
+        }
 
         this.tweens.add({
             targets: this.playerSprite,

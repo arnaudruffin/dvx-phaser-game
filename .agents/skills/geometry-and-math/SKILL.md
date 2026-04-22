@@ -8,7 +8,6 @@ description: "Use this skill when using Phaser 4 math and geometry utilities. Co
 > Geom classes (Circle, Ellipse, Line, Polygon, Rectangle, Triangle), intersection tests, and Math utilities (Vector2, Vector3, Matrix4, angles, distances, interpolation, easing, random, snap, clamp).
 
 Related skills: graphics-and-shapes.md, physics-arcade.md
-
 ---
 
 ## Quick Start

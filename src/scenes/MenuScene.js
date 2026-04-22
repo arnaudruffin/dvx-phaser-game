@@ -205,6 +205,14 @@ export class MenuScene extends Scene {
     }
 
     startGame() {
+        // Play menu click sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('menu-click');
+            this.time.delayedCall(200, () => {
+                this.game.soundManager.playSound('game-start');
+            });
+        }
+
         this.cameras.main.fadeOut(300, 0, 0, 0);
         this.cameras.main.once("camerafadeoutcomplete", () => {
             this.scene.start("GameScene");

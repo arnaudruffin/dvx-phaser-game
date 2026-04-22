@@ -1,4 +1,5 @@
 import * as Phaser from 'phaser';
+import { SoundManager } from './systems/SoundManager';
 
 export class Preloader extends Phaser.Scene {
     constructor() {
@@ -28,6 +29,10 @@ export class Preloader extends Phaser.Scene {
             spacing: { x: 1, y: 1 }
         };
         this.cache.bitmapFont.add('knighthawks', Phaser.GameObjects.RetroFont.Parse(this, config));
+
+        // Initialize Sound Manager and store globally
+        const soundManager = new SoundManager(this);
+        this.game.soundManager = soundManager;
 
         // Generate dungeon sprites procedurally
         this.generateSprites();

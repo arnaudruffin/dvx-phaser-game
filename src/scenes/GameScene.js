@@ -264,6 +264,11 @@ export class GameScene extends Scene {
         this.player.heal(25);
         this.scene.get("HudScene").updateHealth(this.player.currentHp, this.player.maxHp);
 
+        // Play pickup sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('pickup-potion');
+        }
+
         // Floating "+25 PV" text
         const healText = this.add.bitmapText(potion.x, potion.y - 10, 'pixelfont', '+25 PV', 16);
         healText.setTint(0x44ff44);

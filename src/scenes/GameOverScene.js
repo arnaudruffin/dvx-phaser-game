@@ -68,6 +68,11 @@ export class GameOverScene extends Scene {
     }
 
     restartGame() {
+        // Play menu click sound
+        if (this.game.soundManager) {
+            this.game.soundManager.playSound('menu-click');
+        }
+
         this.cameras.main.fadeOut(300, 0, 0, 0);
         this.cameras.main.once("camerafadeoutcomplete", () => {
             this.scene.start("MenuScene");
