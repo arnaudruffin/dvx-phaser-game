@@ -55,8 +55,8 @@ export class DungeonGenerator {
             const ox = Math.floor(Math.random() * (this.roomWidth - 4)) + 2;
             const oy = Math.floor(Math.random() * (this.roomHeight - 4)) + 2;
             
-            // Don't block center or near doors
-            if (Math.abs(ox - midX) > 2 || Math.abs(oy - midY) > 2) {
+            // Don't block center or near doors (must be far from BOTH axes)
+            if (Math.abs(ox - midX) > 2 && Math.abs(oy - midY) > 2) {
                 tiles[oy][ox] = 1;
                 // Sometimes add 2x2 blocks
                 if (Math.random() > 0.5 && ox + 1 < this.roomWidth - 1 && oy + 1 < this.roomHeight - 1) {
@@ -65,6 +65,14 @@ export class DungeonGenerator {
                     tiles[oy + 1][ox + 1] = 1;
                 }
             }
+        }
+
+        // Guarantee door corridors are always clear (safety net against 2x2 overflow)
+        for (let i = 1; i <= 2; i++) {
+            tiles[i][midX] = 0;
+            tiles[this.roomHeight - 1 - i][midX] = 0;
+            tiles[midY][i] = 0;
+            tiles[midY][this.roomWidth - 1 - i] = 0;
         }
 
         // Check if this is a boss room
