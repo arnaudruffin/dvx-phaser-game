@@ -139,7 +139,7 @@ export class GameScene extends Scene {
     }
 
     onEnemyCollision(player, enemy) {
-        if (enemy.isDefeated || this.scene.isActive("QuizScene")) return;
+        if (enemy.isDefeated || this.scene.isActive("QuizScene") || this.combatCooldown) return;
         
         // Store current enemy for combat result
         this.currentEnemy = enemy;
@@ -157,6 +157,10 @@ export class GameScene extends Scene {
 
     onQuizAnswer(data) {
         this.scene.resume();
+        
+        // Brief cooldown to prevent overlap from re-triggering combat immediately
+        this.combatCooldown = true;
+        this.time.delayedCall(500, () => { this.combatCooldown = false; });
         
         // Update player HP from combat result
         if (data.playerHpRemaining !== undefined) {
