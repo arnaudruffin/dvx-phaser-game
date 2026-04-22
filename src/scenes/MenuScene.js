@@ -173,22 +173,25 @@ export class MenuScene extends Scene {
     }
 
     createParticleEffects() {
-        // Magical particle emitter
-        const particles = this.add.particles(0x6666ff)
-            .createEmitter({
-                speed: { min: -50, max: 50 },
-                angle: { min: 240, max: 300 },
-                scale: { start: 0.5, end: 0 },
-                lifespan: 2000,
-                gravityY: -100,
-                emitZone: {
-                    type: 'rectangle',
-                    source: new Phaser.Geom.Rectangle(0, 0, this.scale.width, 150)
-                }
-            })
-            .setDepth(2);
+        // Create a simple particle texture if it doesn't exist
+        if (!this.textures.exists('particle')) {
+            const graphics = this.make.graphics({ x: 0, y: 0, add: false });
+            graphics.fillStyle(0x6666ff);
+            graphics.fillCircle(4, 4, 4);
+            graphics.generateTexture('particle', 8, 8);
+            graphics.destroy();
+        }
 
-        particles.emitParticleAt(this.scale.width / 2, 50, 2);
+        // Magical particle emitter - direct config (no createEmitter in v3.60+)
+        const particles = this.add.particles(this.scale.width / 2, 50, 'particle', {
+            speed: { min: -30, max: 30 },
+            angle: { min: 240, max: 300 },
+            scale: { start: 0.8, end: 0 },
+            lifespan: 2000,
+            gravityY: -80,
+            emitting: false
+        });
+        particles.setDepth(2);
 
         // Continuous emission loop
         this.time.addEvent({
