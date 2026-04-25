@@ -131,7 +131,37 @@ export class MenuScene extends Scene {
         // Start on Enter or click
         this.input.keyboard.on('keydown-ENTER', () => this.startGame());
         this.input.keyboard.on('keydown-SPACE', () => this.startGame());
-        this.input.on("pointerdown", () => this.startGame());    }
+        this.input.on("pointerdown", () => this.startGame());
+
+        this._showHighScores(centerX, centerY);
+    }
+
+    _showHighScores(centerX, centerY) {
+        const hsm = this.game.highScoreManager;
+        const scores = hsm ? hsm.getScores() : [];
+
+        const baseY = centerY + 230;
+
+        this.add.bitmapText(centerX, baseY, "pixelfont", "-- MEILLEURS SCORES --", 14)
+            .setOrigin(0.5, 0.5)
+            .setTint(0xffd700)
+            .setDepth(5);
+
+        if (scores.length === 0) {
+            this.add.bitmapText(centerX, baseY + 24, "pixelfont", "PAS ENCORE DE SCORE", 14)
+                .setOrigin(0.5, 0.5)
+                .setAlpha(0.5)
+                .setDepth(5);
+            return;
+        }
+
+        scores.forEach((entry, i) => {
+            const line = `#${i + 1}  ${entry.name.padEnd(10, ' ')}  ${entry.score.toString().padStart(6, '0')}`;
+            this.add.bitmapText(centerX, baseY + 24 + i * 22, "pixelfont", line, 14)
+                .setOrigin(0.5, 0.5)
+                .setDepth(5);
+        });
+    }
 
     createBackgroundEnemies(centerX, centerY) {
         const enemyTypes = ['enemy-gobelin', 'enemy-squelette', 'enemy-ogre'];

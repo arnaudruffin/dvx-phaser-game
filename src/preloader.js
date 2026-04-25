@@ -1,5 +1,6 @@
 import * as Phaser from 'phaser';
 import { SoundManager } from './systems/SoundManager';
+import { HighScoreManager } from './systems/HighScoreManager';
 
 export class Preloader extends Phaser.Scene {
     constructor() {
@@ -33,6 +34,9 @@ export class Preloader extends Phaser.Scene {
         // Initialize Sound Manager and store globally
         const soundManager = new SoundManager(this);
         this.game.soundManager = soundManager;
+
+        // Initialize High Score Manager and store globally
+        this.game.highScoreManager = new HighScoreManager();
 
         // Generate dungeon sprites procedurally
         this.generateSprites();
