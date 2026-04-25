@@ -5,12 +5,11 @@ const COL = {
     nom:    { x:  10, w: 130, label: 'NOM' },
     pv:     { x: 140, w:  40, label: 'PV' },
     dmg:    { x: 185, w:  40, label: 'DMG' },
-    rnd:    { x: 230, w:  35, label: 'RND' },
-    tables: { x: 268, w:  60, label: 'TABLES' },
-    xp:     { x: 333, w:  55, label: 'XP' },
-    scr:    { x: 393, w:  55, label: 'SCR' },
-    boss:   { x: 453, w:  45, label: 'BOSS' },
-    niv:    { x: 502, w:  40, label: 'NIV' },
+    tables: { x: 230, w:  60, label: 'TABLES' },
+    xp:     { x: 295, w:  55, label: 'XP' },
+    scr:    { x: 355, w:  55, label: 'SCR' },
+    boss:   { x: 415, w:  45, label: 'BOSS' },
+    niv:    { x: 464, w:  40, label: 'NIV' },
 };
 
 const ROW_H = 20;
@@ -124,7 +123,7 @@ export class DebugScene extends Scene {
         }
 
         // Header underline
-        c.add(this.add.rectangle(tableX, startY + 14, 542, 2, 0x445566).setOrigin(0, 0.5));
+        c.add(this.add.rectangle(tableX, startY + 14, 504, 2, 0x445566).setOrigin(0, 0.5));
 
         // Separate regular enemies and bosses
         const types = Object.entries(Enemy.ENEMY_TYPES);
@@ -138,7 +137,7 @@ export class DebugScene extends Scene {
         }
 
         // Boss separator
-        c.add(this.add.rectangle(tableX, rowY + 2, 542, 2, 0xff4400, 0.6).setOrigin(0, 0.5));
+        c.add(this.add.rectangle(tableX, rowY + 2, 504, 2, 0xff4400, 0.6).setOrigin(0, 0.5));
         c.add(this.add.bitmapText(tableX + 180, rowY + 8, 'pixelfont', '--- BOSS ---', 14)
             .setTint(0xff6600));
         rowY += 20;
@@ -160,7 +159,6 @@ export class DebugScene extends Scene {
             { col: 'nom',    text: cfg.name },
             { col: 'pv',     text: String(cfg.maxHp) },
             { col: 'dmg',    text: String(cfg.damage) },
-            { col: 'rnd',    text: String(cfg.rounds) },
             { col: 'tables', text: `${cfg.minTable}-${cfg.maxTable}` },
             { col: 'xp',     text: String(cfg.xpValue) },
             { col: 'scr',    text: String(cfg.scoreValue) },

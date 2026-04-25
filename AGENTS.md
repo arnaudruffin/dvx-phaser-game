@@ -108,33 +108,33 @@ Le niveau est affiché dans le HUD (`NIV:X`, en bas à gauche). Un level up déc
 
 ### Types d'ennemis normaux (`Enemy.ENEMY_TYPES`)
 
-| Type | Texture | HP | Dégâts | Rounds | Tables | Score | XP | Niveau requis |
-|------|---------|-----|--------|--------|--------|-------|----|---------------|
-| Gobelin | `enemy-gobelin` (vert) | 30 | 8 | 2 | 1–4 | 100 | 80 | 1 |
-| Loup-Garou | `enemy-loup-garou` (marron) | 40 | 10 | 2 | 2–5 | 150 | 130 | 2 |
-| Squelette | `enemy-squelette` (blanc) | 50 | 12 | 3 | 3–6 | 200 | 180 | 3 |
-| Chevalier Noir | `enemy-chevalier-noir` (sombre) | 65 | 16 | 3 | 4–8 | 280 | 280 | 4 |
-| Ogre | `enemy-ogre` (rouge) | 80 | 20 | 4 | 5–9 | 350 | 380 | 5 |
-| Liche | `enemy-liche` (violet) | 100 | 25 | 4 | 6–10 | 500 | 520 | 6 |
-| Démon | `enemy-demon` (rouge sombre) | 130 | 35 | 5 | 8–10 | 700 | 720 | 7 |
-| Vampire | `enemy-vampire` (violet/noir) | 150 | 42 | 5 | 8–10 | 900 | 950 | 8 |
-| Golem de Pierre | `enemy-golem` (gris ardoise) | 170 | 50 | 5 | 9–10 | 1100 | 1200 | 9 |
-| Nécromancien | `enemy-necromancien` (noir/vert) | 195 | 58 | 6 | 9–10 | 1350 | 1500 | 10 |
-| Hydre | `enemy-hydre` (vert/teal) | 220 | 66 | 6 | 10 | 1600 | 1800 | 11 |
-| Chimère | `enemy-chimere` (orange) | 245 | 74 | 6 | 10 | 1900 | 2200 | 12 |
-| Sorcière Noire | `enemy-sorciere-noire` (noir/vert) | 275 | 85 | 6 | 10 | 2200 | 2700 | 13 |
-| Ange Déchu | `enemy-ange-dechu` (blanc corrompu) | 310 | 98 | 7 | 10 | 2600 | 3300 | 14 |
-| Titan de Feu | `enemy-titan-feu` (orange/rouge) | 360 | 115 | 7 | 10 | 3100 | 4000 | 15 |
-| Archidémon | `enemy-archidemon` (rouge sang) | 420 | 140 | 7 | 10 | 3700 | 4900 | 16 |
-| Dieu de la Mort | `enemy-dieu-mort` (noir/or) | 500 | 170 | 8 | 10 | 4500 | 6000 | 17 |
+| Type | Texture | HP | Dégâts | Tables | Score | XP | Niveau requis |
+|------|---------|-----|--------|--------|-------|----|---------------|
+| Gobelin | `enemy-gobelin` (vert) | 30 | 8 | 1–4 | 100 | 80 | 1 |
+| Loup-Garou | `enemy-loup-garou` (marron) | 40 | 10 | 2–5 | 150 | 130 | 2 |
+| Squelette | `enemy-squelette` (blanc) | 50 | 12 | 3–6 | 200 | 180 | 3 |
+| Chevalier Noir | `enemy-chevalier-noir` (sombre) | 65 | 16 | 4–8 | 280 | 280 | 4 |
+| Ogre | `enemy-ogre` (rouge) | 80 | 20 | 5–9 | 350 | 380 | 5 |
+| Liche | `enemy-liche` (violet) | 100 | 25 | 6–10 | 500 | 520 | 6 |
+| Démon | `enemy-demon` (rouge sombre) | 130 | 35 | 8–10 | 700 | 720 | 7 |
+| Vampire | `enemy-vampire` (violet/noir) | 150 | 42 | 8–10 | 900 | 950 | 8 |
+| Golem de Pierre | `enemy-golem` (gris ardoise) | 170 | 50 | 9–10 | 1100 | 1200 | 9 |
+| Nécromancien | `enemy-necromancien` (noir/vert) | 195 | 58 | 9–10 | 1350 | 1500 | 10 |
+| Hydre | `enemy-hydre` (vert/teal) | 220 | 66 | 10 | 1600 | 1800 | 11 |
+| Chimère | `enemy-chimere` (orange) | 245 | 74 | 10 | 1900 | 2200 | 12 |
+| Sorcière Noire | `enemy-sorciere-noire` (noir/vert) | 275 | 85 | 10 | 2200 | 2700 | 13 |
+| Ange Déchu | `enemy-ange-dechu` (blanc corrompu) | 310 | 98 | 10 | 2600 | 3300 | 14 |
+| Titan de Feu | `enemy-titan-feu` (orange/rouge) | 360 | 115 | 10 | 3100 | 4000 | 15 |
+| Archidémon | `enemy-archidemon` (rouge sang) | 420 | 140 | 10 | 3700 | 4900 | 16 |
+| Dieu de la Mort | `enemy-dieu-mort` (noir/or) | 500 | 170 | 10 | 4500 | 6000 | 17 |
 
 ### Types de boss
 
-| Type | Texture | HP | Dégâts | Rounds | Tables | Score | XP | Niveau requis |
-|------|---------|-----|--------|--------|--------|-------|----|---------------|
-| Chef Gobelin | `boss-gobelin` | 50 | 15 | 3 | 2–7 | 400 | 500 | 1–2 |
-| Troll des Cavernes | `boss-troll` | 120 | 30 | 5 | 5–10 | 800 | 1000 | 3–5 |
-| Dragon Ancien | `boss-dragon` | 180 | 45 | 6 | 7–10 | 1500 | 2000 | 6+ |
+| Type | Texture | HP | Dégâts | Tables | Score | XP | Niveau requis |
+|------|---------|-----|--------|--------|-------|----|---------------|
+| Chef Gobelin | `boss-gobelin` | 50 | 15 | 2–7 | 400 | 500 | 1–2 |
+| Troll des Cavernes | `boss-troll` | 120 | 30 | 5–10 | 800 | 1000 | 3–5 |
+| Dragon Ancien | `boss-dragon` | 180 | 45 | 7–10 | 1500 | 2000 | 6+ |
 
 ### Pool d'ennemis par niveau joueur
 

@@ -27,8 +27,6 @@ export class QuizScene extends Scene {
         this.quizManager = new QuizManager(scaledMinTable, scaledMaxTable, mode);
         this.gameMode = mode;
 
-        this.currentRound = 0;
-        this.maxRounds = data.enemyConfig.rounds;
         this.totalScore = 0;
         this.currentAnswer = "";
         this.inputEnabled = false;
@@ -92,9 +90,7 @@ export class QuizScene extends Scene {
         this.add.bitmapText(W - 10, 10, "pixelfont", modeLabel, 14)
             .setOrigin(1, 0).setDepth(5).setTint(this.gameMode === 'addition' ? 0x44aaff : 0x44ff44);
 
-        // --- Round counter (bottom-left) ---
-        this.roundText = this.add.bitmapText(20, H - 30, "pixelfont", "", 18)
-            .setDepth(5).setAlpha(0);
+
 
         // --- Feedback text (reusable, hidden) ---
         this.feedbackText = this.add.bitmapText(W / 2, H - 30, "pixelfont", "", 20)
@@ -289,8 +285,6 @@ export class QuizScene extends Scene {
     }
 
     startNextRound() {
-        this.currentRound++;
-
         if (this.enemyHp <= 0) {
             this.playVictory();
             return;
@@ -299,13 +293,7 @@ export class QuizScene extends Scene {
             this.playDefeat();
             return;
         }
-        if (this.currentRound > this.maxRounds) {
-            // Rounds exhausted — enemy survives
-            this.endCombat(false);
-            return;
-        }
 
-        this.roundText.setText(`ROUND ${this.currentRound}/${this.maxRounds}`).setAlpha(1);
         // Delay before showing the next question to prevent overlapping with defense UI
         this.time.delayedCall(300, () => {
             this.showQuestion();
