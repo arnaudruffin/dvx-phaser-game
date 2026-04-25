@@ -30,8 +30,8 @@ export class ConfigScene extends Scene {
             .setOrigin(0.5, 0.5)
             .setDepth(2);
 
-        // Options background
-        this.add.rectangle(cx, H / 2, 500, 220, 0x2d2d44)
+        // Options background — centré sur le contenu (y=220 à y=450) avec padding
+        this.add.rectangle(cx, 335, W * 0.55, 290, 0x2d2d44)
             .setOrigin(0.5, 0.5)
             .setAlpha(0.7)
             .setDepth(1);
