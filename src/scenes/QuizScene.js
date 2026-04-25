@@ -14,7 +14,18 @@ export class QuizScene extends Scene {
         this.enemyHp = data.enemyCurrentHp;
         this.enemyMaxHp = data.enemyConfig.maxHp;
 
-        this.quizManager = new QuizManager(data.enemyConfig.minTable, data.enemyConfig.maxTable);
+        const gameConfig = data.gameConfig || { maxTable: 10, mode: 'multiplication' };
+        const globalMax = gameConfig.maxTable;
+        const mode = gameConfig.mode;
+
+        // Scale enemy tables proportionally to the chosen global max
+        const scaleFactor = globalMax / 10;
+        const scaledMinTable = Math.max(1, Math.round(data.enemyConfig.minTable * scaleFactor));
+        const scaledMaxTable = Math.max(scaledMinTable + 1, Math.round(data.enemyConfig.maxTable * scaleFactor));
+
+        this.difficultyMultiplier = globalMax / 10;
+        this.quizManager = new QuizManager(scaledMinTable, scaledMaxTable, mode);
+        this.gameMode = mode;
 
         this.currentRound = 0;
         this.maxRounds = data.enemyConfig.rounds;
@@ -75,6 +86,11 @@ export class QuizScene extends Scene {
 
         this.instructionText = this.add.bitmapText(W / 2, H * 0.67, "pixelfont", "TAPE TA REPONSE", 16)
             .setOrigin(0.5, 0.5).setDepth(11).setAlpha(0);
+
+        // Mode indicator
+        const modeLabel = this.gameMode === 'addition' ? '+ ADDITIONS' : 'x MULTIPLICATIONS';
+        this.add.bitmapText(W - 10, 10, "pixelfont", modeLabel, 14)
+            .setOrigin(1, 0).setDepth(5).setTint(this.gameMode === 'addition' ? 0x44aaff : 0x44ff44);
 
         // --- Round counter (bottom-left) ---
         this.roundText = this.add.bitmapText(20, H - 30, "pixelfont", "", 18)
@@ -349,7 +365,8 @@ export class QuizScene extends Scene {
         }
 
         if (isCorrect) {
-            this.totalScore += this.quizManager.calculateTimeBonus(elapsed);
+            const bonus = this.quizManager.calculateTimeBonus(elapsed);
+            this.totalScore += Math.round(bonus * this.difficultyMultiplier);
         }
 
         this.hideQuestion();
@@ -698,7 +715,7 @@ export class QuizScene extends Scene {
 
     playVictory() {
         this.state = 'victory';
-        this.totalScore += this.enemyConfig.scoreValue;
+        this.totalScore += Math.round(this.enemyConfig.scoreValue * this.difficultyMultiplier);
 
         // Play victory sound
         if (this.game.soundManager) {

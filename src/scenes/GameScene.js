@@ -175,7 +175,8 @@ export class GameScene extends Scene {
             playerMaxHp: this.player.maxHp,
             enemyType: enemy.enemyType,
             enemyConfig: enemy.config,
-            enemyCurrentHp: enemy.currentHp
+            enemyCurrentHp: enemy.currentHp,
+            gameConfig: this.game.registry.get('gameConfig') || { maxTable: 10, mode: 'multiplication' }
         });
     }
 

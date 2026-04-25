@@ -81,7 +81,7 @@ export class MenuScene extends Scene {
         // Staggered instruction animations
         const instructions = [
             { text: "EXPLORE LE DONJON", y: centerY + 50 },
-            { text: "RESOUS LES MULTIPLICATIONS", y: centerY + 80 },
+            { text: "RESOUS LES CALCULS", y: centerY + 80 },
             { text: "VAINCS LES MONSTRES", y: centerY + 110 }
         ];
 
@@ -131,8 +131,7 @@ export class MenuScene extends Scene {
         // Start on Enter or click
         this.input.keyboard.on('keydown-ENTER', () => this.startGame());
         this.input.keyboard.on('keydown-SPACE', () => this.startGame());
-        this.input.on("pointerdown", () => this.startGame());
-    }
+        this.input.on("pointerdown", () => this.startGame());    }
 
     createBackgroundEnemies(centerX, centerY) {
         const enemyTypes = ['enemy-gobelin', 'enemy-squelette', 'enemy-ogre'];
@@ -218,7 +217,7 @@ export class MenuScene extends Scene {
 
         this.cameras.main.fadeOut(300, 0, 0, 0);
         this.cameras.main.once("camerafadeoutcomplete", () => {
-            this.scene.start("GameScene");
+            this.scene.start("ConfigScene");
         });
     }
 }

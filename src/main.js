@@ -4,6 +4,7 @@ import { GameOverScene } from "./scenes/GameOverScene";
 import { HudScene } from "./scenes/HudScene";
 import { GameScene } from "./scenes/GameScene";
 import { MenuScene } from "./scenes/MenuScene";
+import { ConfigScene } from "./scenes/ConfigScene";
 import { QuizScene } from "./scenes/QuizScene";
 import * as Phaser from 'phaser';
 
@@ -31,6 +32,7 @@ const config = {
     scene: [
         Preloader,
         MenuScene,
+        ConfigScene,
         GameScene,
         QuizScene,
         HudScene,

@@ -1,18 +1,28 @@
 export class QuizManager {
-    constructor(minTable = 1, maxTable = 10) {
+    constructor(minTable = 1, maxTable = 10, mode = 'multiplication') {
         this.minTable = minTable;
         this.maxTable = maxTable;
+        this.mode = mode;
     }
 
     generateQuestion() {
-        const a = Math.floor(Math.random() * this.maxTable) + this.minTable;
-        const b = Math.floor(Math.random() * this.maxTable) + this.minTable;
+        const a = Math.floor(Math.random() * (this.maxTable - this.minTable + 1)) + this.minTable;
+        const b = Math.floor(Math.random() * (this.maxTable - this.minTable + 1)) + this.minTable;
+
+        if (this.mode === 'addition') {
+            return {
+                text: `${a} + ${b} = ?`,
+                answer: a + b,
+                a,
+                b
+            };
+        }
 
         return {
             text: `${a} x ${b} = ?`,
             answer: a * b,
-            a: a,
-            b: b
+            a,
+            b
         };
     }
 
@@ -34,15 +44,18 @@ export class QuizManager {
         return Math.floor(50 - (elapsedSeconds - 2) * 5);
     }
 
+    getDifficultyMultiplier(maxTable) {
+        return maxTable / 10;
+    }
+
     // Defense timing validation
     checkDefenseTiming(windowStartMs, windowEndMs, playerInputTimeMs) {
         return playerInputTimeMs >= windowStartMs && playerInputTimeMs <= windowEndMs;
     }
 
     calculateDefenseWindow(totalDefenseDurationMs = 600) {
-        // Center the window: player has 300ms before and 300ms after the "perfect" moment
         const perfectMoment = totalDefenseDurationMs / 2;
-        const margin = 150; // ±150ms tolerance
+        const margin = 150;
         return {
             windowStart: perfectMoment - margin,
             windowEnd: perfectMoment + margin,
