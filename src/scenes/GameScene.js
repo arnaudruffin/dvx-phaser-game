@@ -3,6 +3,7 @@ import { Player } from "../gameobjects/Player";
 import { Enemy } from "../gameobjects/Enemy";
 import { DungeonGenerator } from "../systems/DungeonGenerator";
 import { ScoreManager } from "../systems/ScoreManager";
+import { LevelManager } from "../systems/LevelManager";
 
 export class GameScene extends Scene {
     player = null;
@@ -22,6 +23,7 @@ export class GameScene extends Scene {
     init() {
         this.cameras.main.fadeIn(500, 0, 0, 0);
         this.scoreManager = new ScoreManager();
+        this.levelManager = new LevelManager();
     }
 
     create() {
@@ -55,7 +57,8 @@ export class GameScene extends Scene {
             room: "0,0",
             playerHp: this.player.currentHp,
             playerMaxHp: this.player.maxHp,
-            isBossRoom: this.currentRoom.isBossRoom
+            isBossRoom: this.currentRoom.isBossRoom,
+            level: this.levelManager.getLevel()
         });
         
         // Listen for quiz results
@@ -127,6 +130,7 @@ export class GameScene extends Scene {
         room.enemyPositions.forEach(pos => {
             const enemy = new Enemy(this, pos.x, pos.y, pos.type || 'gobelin');
             enemy.setDepth(5);
+            enemy.spawnPos = pos; // reference to the position entry for later removal
             this.enemies.add(enemy);
         });
         
@@ -135,6 +139,7 @@ export class GameScene extends Scene {
             room.potionPositions.forEach(pos => {
                 const potion = this.physics.add.image(pos.x, pos.y, 'potion');
                 potion.setDepth(3);
+                potion.spawnPos = pos; // reference to the position entry for later removal
                 this.tweens.add({
                     targets: potion,
                     y: pos.y - 6,
@@ -210,6 +215,20 @@ export class GameScene extends Scene {
             // Use score from combat scene
             const points = data.score || 100;
             this.scoreManager.addPoints(points);
+            
+            // Award XP and check for level up
+            const xpValue = this.currentEnemy.config.xpValue || 0;
+            const { leveledUp, newLevel } = this.levelManager.addXp(xpValue);
+            if (leveledUp) {
+                this.dungeonGenerator.currentLevel = newLevel;
+                this.scene.get("HudScene").onLevelUp(newLevel);
+            }
+            
+            // Remove from room cache so it doesn't respawn on re-entry
+            if (this.currentEnemy.spawnPos) {
+                const idx = this.currentRoom.enemyPositions.indexOf(this.currentEnemy.spawnPos);
+                if (idx !== -1) this.currentRoom.enemyPositions.splice(idx, 1);
+            }
             
             // Defeat enemy
             this.currentEnemy.defeat();
@@ -314,6 +333,12 @@ export class GameScene extends Scene {
             duration: 400,
             onComplete: () => potion.destroy()
         });
+
+        // Remove from room cache so it doesn't respawn on re-entry
+        if (this.currentRoom.potionPositions && potion.spawnPos) {
+            const idx = this.currentRoom.potionPositions.indexOf(potion.spawnPos);
+            if (idx !== -1) this.currentRoom.potionPositions.splice(idx, 1);
+        }
     }
 
     update() {

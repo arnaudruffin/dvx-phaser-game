@@ -5,6 +5,7 @@ export class DungeonGenerator {
         this.roomHeight = roomHeight;
         this.tileSize = tileSize;
         this.rooms = new Map();
+        this.currentLevel = 1;
     }
 
     getRoomKey(x, y) {
@@ -94,7 +95,7 @@ export class DungeonGenerator {
                     if (tiles[ey][ex] === 0) {
                         const posX = ex * this.tileSize + this.tileSize / 2;
                         const posY = ey * this.tileSize + this.tileSize / 2;
-                        enemyPositions.push({ x: posX, y: posY, type: this.pickBossType(x, y) });
+                        enemyPositions.push({ x: posX, y: posY, type: this.pickBossType(this.currentLevel) });
                         break;
                     }
                     attempts++;
@@ -119,7 +120,7 @@ export class DungeonGenerator {
                             );
                             
                             if (!tooClose) {
-                                enemyPositions.push({ x: posX, y: posY, type: this.pickEnemyType(x, y) });
+                                enemyPositions.push({ x: posX, y: posY, type: this.pickEnemyType(this.currentLevel) });
                                 break;
                             }
                         }
@@ -174,31 +175,20 @@ export class DungeonGenerator {
         return distance > 0 && distance % 5 === 0;
     }
 
-    pickBossType(roomX, roomY) {
-        const distance = Math.abs(roomX) + Math.abs(roomY);
-        
-        // Progressive boss types based on distance
-        if (distance <= 5) {
-            return 'boss-gobelin';
-        } else if (distance <= 15) {
-            return 'boss-troll';
-        } else {
-            return 'boss-dragon';
-        }
+    pickBossType(level) {
+        if (level <= 2) return 'boss-gobelin';
+        if (level <= 5) return 'boss-troll';
+        return 'boss-dragon';
     }
 
-    pickEnemyType(roomX, roomY) {
-        const distance = Math.abs(roomX) + Math.abs(roomY);
+    pickEnemyType(level) {
         const roll = Math.random();
-
-        if (distance <= 2) {
-            return 'gobelin';
-        } else if (distance <= 4) {
-            return roll < 0.4 ? 'gobelin' : 'squelette';
-        } else if (distance <= 6) {
-            return roll < 0.4 ? 'squelette' : 'ogre';
-        } else {
-            return roll < 0.3 ? 'squelette' : 'ogre';
-        }
+        if (level <= 1) return 'gobelin';
+        if (level === 2) return roll < 0.5 ? 'gobelin' : 'loup-garou';
+        if (level === 3) return roll < 0.4 ? 'loup-garou' : 'squelette';
+        if (level === 4) return roll < 0.4 ? 'squelette' : 'chevalier-noir';
+        if (level === 5) return roll < 0.3 ? 'chevalier-noir' : 'ogre';
+        if (level === 6) return roll < 0.4 ? 'ogre' : 'liche';
+        return roll < 0.4 ? 'liche' : 'demon';
     }
 }

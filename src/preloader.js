@@ -167,6 +167,104 @@ export class Preloader extends Phaser.Scene {
         ogreGfx.fillTriangle(20, 24, 22, 24, 21, 27); // right fang
         ogreGfx.generateTexture('enemy-ogre', tileSize, tileSize);
 
+        // Loup-garou - brown wolf head with pointy ears and fangs
+        const loupGarouGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        loupGarouGfx.fillStyle(0x8b5e3c);
+        loupGarouGfx.fillCircle(16, 18, 12); // head
+        loupGarouGfx.fillStyle(0x6b3e1e);
+        loupGarouGfx.fillTriangle(6, 12, 10, 2, 14, 12); // left ear
+        loupGarouGfx.fillTriangle(18, 12, 22, 2, 26, 12); // right ear
+        loupGarouGfx.fillStyle(0xcc9966);
+        loupGarouGfx.fillRect(10, 20, 12, 6); // muzzle
+        loupGarouGfx.fillStyle(0xff4400);
+        loupGarouGfx.fillCircle(11, 16, 3); // left eye
+        loupGarouGfx.fillCircle(21, 16, 3); // right eye
+        loupGarouGfx.fillStyle(0x000000);
+        loupGarouGfx.fillCircle(11, 16, 1.5); // left pupil (slit)
+        loupGarouGfx.fillCircle(21, 16, 1.5); // right pupil
+        loupGarouGfx.fillStyle(0x222222);
+        loupGarouGfx.fillRect(12, 25, 8, 2); // mouth line
+        loupGarouGfx.fillStyle(0xffffff);
+        loupGarouGfx.fillTriangle(12, 25, 14, 25, 13, 28); // left fang
+        loupGarouGfx.fillTriangle(18, 25, 20, 25, 19, 28); // right fang
+        loupGarouGfx.generateTexture('enemy-loup-garou', tileSize, tileSize);
+
+        // Chevalier Noir - dark armored knight with visor and glowing eyes
+        const chevalierNoirGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        chevalierNoirGfx.fillStyle(0x1a1a2e);
+        chevalierNoirGfx.fillRect(8, 6, 16, 22); // dark armor body
+        chevalierNoirGfx.fillStyle(0x111122);
+        chevalierNoirGfx.fillRect(6, 4, 20, 14); // helmet
+        chevalierNoirGfx.fillStyle(0x0d0d1a);
+        chevalierNoirGfx.fillRect(8, 8, 16, 6); // visor slit
+        chevalierNoirGfx.fillStyle(0xff2222);
+        chevalierNoirGfx.fillRect(10, 10, 5, 3); // left glowing eye
+        chevalierNoirGfx.fillRect(17, 10, 5, 3); // right glowing eye
+        chevalierNoirGfx.fillStyle(0x333355);
+        chevalierNoirGfx.fillRect(4, 14, 6, 14); // left pauldron + arm
+        chevalierNoirGfx.fillRect(22, 14, 6, 14); // right pauldron + arm
+        chevalierNoirGfx.fillStyle(0xaaaacc);
+        chevalierNoirGfx.fillRect(26, 8, 3, 20); // dark sword
+        chevalierNoirGfx.fillRect(23, 14, 9, 2); // crossguard
+        chevalierNoirGfx.fillStyle(0x222233);
+        chevalierNoirGfx.fillRect(11, 28, 5, 4); // left leg
+        chevalierNoirGfx.fillRect(16, 28, 5, 4); // right leg
+        chevalierNoirGfx.generateTexture('enemy-chevalier-noir', tileSize, tileSize);
+
+        // Liche - skeletal undead mage with glowing purple eyes and robes
+        const licheGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        licheGfx.fillStyle(0x2d1b4e);
+        licheGfx.fillRect(8, 14, 16, 18); // dark robe body
+        licheGfx.fillStyle(0xd4c9aa);
+        licheGfx.fillCircle(16, 12, 10); // skull head
+        licheGfx.fillStyle(0x6600cc);
+        licheGfx.fillCircle(11, 11, 4); // left glowing eye socket
+        licheGfx.fillCircle(21, 11, 4); // right glowing eye socket
+        licheGfx.fillStyle(0xdd00ff);
+        licheGfx.fillCircle(11, 11, 2); // left eye glow
+        licheGfx.fillCircle(21, 11, 2); // right eye glow
+        licheGfx.fillStyle(0x111111);
+        licheGfx.fillTriangle(14, 16, 16, 16, 15, 18); // nose cavity
+        licheGfx.fillStyle(0xbbaa99);
+        licheGfx.fillRect(10, 20, 12, 2); // teeth row
+        licheGfx.fillStyle(0x111111);
+        licheGfx.fillRect(12, 20, 1, 2);
+        licheGfx.fillRect(15, 20, 1, 2);
+        licheGfx.fillRect(18, 20, 1, 2);
+        licheGfx.fillStyle(0x4400aa);
+        licheGfx.fillRect(4, 16, 6, 2); // left arm bone
+        licheGfx.fillRect(22, 16, 6, 2); // right arm bone
+        licheGfx.fillStyle(0xdd00ff);
+        licheGfx.fillCircle(4, 15, 3); // left orb
+        licheGfx.fillCircle(28, 15, 3); // right orb
+        licheGfx.generateTexture('enemy-liche', tileSize, tileSize);
+
+        // Démon - dark red demon with horns and wings
+        const demonGfx = this.make.graphics({ x: 0, y: 0, add: false });
+        demonGfx.fillStyle(0x8b0000);
+        demonGfx.fillCircle(16, 16, 13); // body/head
+        demonGfx.fillStyle(0x5c0000);
+        demonGfx.fillTriangle(5, 10, 10, 0, 13, 10); // left horn
+        demonGfx.fillTriangle(19, 10, 22, 0, 27, 10); // right horn
+        demonGfx.fillStyle(0x3a0000);
+        demonGfx.fillTriangle(0, 8, 6, 16, 0, 22); // left wing
+        demonGfx.fillTriangle(32, 8, 26, 16, 32, 22); // right wing
+        demonGfx.fillStyle(0xff6600);
+        demonGfx.fillCircle(11, 14, 4); // left eye
+        demonGfx.fillCircle(21, 14, 4); // right eye
+        demonGfx.fillStyle(0xffcc00);
+        demonGfx.fillCircle(11, 14, 2); // left pupil
+        demonGfx.fillCircle(21, 14, 2); // right pupil
+        demonGfx.fillStyle(0x440000);
+        demonGfx.fillRect(8, 10, 5, 2); // left brow
+        demonGfx.fillRect(19, 10, 5, 2); // right brow
+        demonGfx.fillStyle(0x220000);
+        demonGfx.fillRect(8, 22, 16, 4); // wide mouth
+        demonGfx.fillStyle(0xffffff);
+        demonGfx.fillTriangle(9, 22, 12, 22, 10, 26); // left fang
+        demonGfx.fillTriangle(20, 22, 23, 22, 22, 26); // right fang
+        demonGfx.generateTexture('enemy-demon', tileSize, tileSize);
+
         // Boss Gobelin - large, golden, menacing version with crown
         const bossGobelinGfx = this.make.graphics({ x: 0, y: 0, add: false });
         bossGobelinGfx.fillStyle(0x88dd44);

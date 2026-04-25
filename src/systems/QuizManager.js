@@ -47,19 +47,4 @@ export class QuizManager {
     getDifficultyMultiplier(maxTable) {
         return maxTable / 10;
     }
-
-    // Defense timing validation
-    checkDefenseTiming(windowStartMs, windowEndMs, playerInputTimeMs) {
-        return playerInputTimeMs >= windowStartMs && playerInputTimeMs <= windowEndMs;
-    }
-
-    calculateDefenseWindow(totalDefenseDurationMs = 600) {
-        const perfectMoment = totalDefenseDurationMs / 2;
-        const margin = 150;
-        return {
-            windowStart: perfectMoment - margin,
-            windowEnd: perfectMoment + margin,
-            perfectMoment
-        };
-    }
 }
