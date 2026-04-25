@@ -66,7 +66,7 @@ export class GameOverScene extends Scene {
             .setTint(0xffd700);
         recordText.postFX.addGlow(0xffd700, 1);
 
-        this.add.bitmapText(centerX, centerY + 205, "pixelfont", "TON NOM :", 18)
+        const labelText = this.add.bitmapText(centerX, centerY + 205, "pixelfont", "TON NOM :", 18)
             .setOrigin(0.5, 0.5);
 
         let playerName = '';
@@ -78,12 +78,20 @@ export class GameOverScene extends Scene {
             nameDisplay.setText(playerName + '_');
         };
 
+        const hintText = this.add.bitmapText(centerX, centerY + 268, "pixelfont", "ENTREE POUR VALIDER", 14)
+            .setOrigin(0.5, 0.5)
+            .setAlpha(0.6);
+
+        const nameInputElements = [recordText, labelText, nameDisplay, hintText];
+
         const allowedChars = /^[A-Za-z0-9 ]$/;
 
-        const keyHandler = this.input.keyboard.on('keydown', (event) => {
+        let keydownHandler;
+        keydownHandler = (event) => {
             if (event.key === 'Enter') {
                 if (playerName.trim().length === 0) return;
-                this.input.keyboard.off('keydown', keyHandler);
+                this.input.keyboard.off('keydown', keydownHandler);
+                nameInputElements.forEach(el => el.destroy());
                 this._submitScore(playerName.trim(), centerX, centerY);
             } else if (event.key === 'Backspace') {
                 playerName = playerName.slice(0, -1);
@@ -92,11 +100,8 @@ export class GameOverScene extends Scene {
                 playerName += event.key.toUpperCase();
                 updateDisplay();
             }
-        });
-
-        this.add.bitmapText(centerX, centerY + 268, "pixelfont", "ENTREE POUR VALIDER", 14)
-            .setOrigin(0.5, 0.5)
-            .setAlpha(0.6);
+        };
+        this.input.keyboard.on('keydown', keydownHandler);
     }
 
     _submitScore(name, centerX, centerY) {
