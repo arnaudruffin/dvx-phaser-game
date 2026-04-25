@@ -6,6 +6,8 @@ import { GameScene } from "./scenes/GameScene";
 import { MenuScene } from "./scenes/MenuScene";
 import { ConfigScene } from "./scenes/ConfigScene";
 import { QuizScene } from "./scenes/QuizScene";
+import { DebugScene } from "./scenes/DebugScene";
+import { GlobalScene } from "./scenes/GlobalScene";
 import * as Phaser from 'phaser';
 
 const config = {
@@ -31,13 +33,15 @@ const config = {
     },
     scene: [
         Preloader,
+        GlobalScene,
         MenuScene,
         ConfigScene,
         GameScene,
         QuizScene,
         HudScene,
-        GameOverScene
+        GameOverScene,
+        DebugScene
     ]
 };
 
-new Game(config);
+const game = new Game(config);

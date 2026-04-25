@@ -41,6 +41,7 @@ export class Preloader extends Phaser.Scene {
         // Generate dungeon sprites procedurally
         this.generateSprites();
 
+        this.scene.launch('GlobalScene');
         this.scene.start("MenuScene");
     }
 

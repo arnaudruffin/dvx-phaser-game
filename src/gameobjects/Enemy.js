@@ -13,7 +13,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 1,
             maxTable: 4,
             scoreValue: 100,
-            xpValue: 80
+            xpValue: 80,
+            minLevel: 1
         },
         'loup-garou': {
             texture: 'enemy-loup-garou',
@@ -24,7 +25,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 2,
             maxTable: 5,
             scoreValue: 150,
-            xpValue: 130
+            xpValue: 130,
+            minLevel: 2
         },
         squelette: {
             texture: 'enemy-squelette',
@@ -35,7 +37,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 3,
             maxTable: 6,
             scoreValue: 200,
-            xpValue: 180
+            xpValue: 180,
+            minLevel: 3
         },
         'chevalier-noir': {
             texture: 'enemy-chevalier-noir',
@@ -46,7 +49,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 4,
             maxTable: 8,
             scoreValue: 280,
-            xpValue: 280
+            xpValue: 280,
+            minLevel: 4
         },
         ogre: {
             texture: 'enemy-ogre',
@@ -57,7 +61,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 5,
             maxTable: 9,
             scoreValue: 350,
-            xpValue: 380
+            xpValue: 380,
+            minLevel: 5
         },
         liche: {
             texture: 'enemy-liche',
@@ -68,7 +73,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 6,
             maxTable: 10,
             scoreValue: 500,
-            xpValue: 520
+            xpValue: 520,
+            minLevel: 6
         },
         demon: {
             texture: 'enemy-demon',
@@ -79,7 +85,8 @@ export class Enemy extends Physics.Arcade.Image {
             minTable: 8,
             maxTable: 10,
             scoreValue: 700,
-            xpValue: 720
+            xpValue: 720,
+            minLevel: 7
         },
         'boss-gobelin': {
             texture: 'boss-gobelin',
@@ -91,7 +98,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 7,
             scoreValue: 400,
             xpValue: 500,
-            isBoss: true
+            isBoss: true,
+            minLevel: 1
         },
         'boss-troll': {
             texture: 'boss-troll',
@@ -103,7 +111,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 800,
             xpValue: 1000,
-            isBoss: true
+            isBoss: true,
+            minLevel: 3
         },
         'boss-dragon': {
             texture: 'boss-dragon',
@@ -115,7 +124,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 1500,
             xpValue: 2000,
-            isBoss: true
+            isBoss: true,
+            minLevel: 6
         }
     };
 
