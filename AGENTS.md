@@ -6,7 +6,7 @@
 
 ### Concept
 - Le joueur explore un donjon généré procéduralement (vue top-down)
-- Chaque salle contient des monstres de 7 types (Gobelin → Démon)
+- Chaque salle contient des monstres de 17 types (Gobelin → Dieu de la Mort)
 - Toucher un monstre déclenche un **combat RPG tour par tour**
 - Chaque round : une multiplication → le joueur attaque → l'ennemi riposte
 - Plus la réponse est rapide, plus le coup est puissant (CRITIQUE! → FAIBLE)
@@ -37,7 +37,7 @@ src/
 │   └── GameOverScene.js    # Score final + restart
 ├── gameobjects/
 │   ├── Player.js           # Héros contrôlable (4 directions, HP persistant)
-│   └── Enemy.js            # Monstres avec 10 types (7 normaux + 3 boss)
+│   └── Enemy.js            # Monstres avec 20 types (17 normaux + 3 boss)
 └── systems/
     ├── DungeonGenerator.js # Génération procédurale (salles, ennemis, potions)
     ├── LevelManager.js     # Système XP → niveau joueur
@@ -117,6 +117,16 @@ Le niveau est affiché dans le HUD (`NIV:X`, en bas à gauche). Un level up déc
 | Ogre | `enemy-ogre` (rouge) | 80 | 20 | 4 | 5–9 | 350 | 380 | 5 |
 | Liche | `enemy-liche` (violet) | 100 | 25 | 4 | 6–10 | 500 | 520 | 6 |
 | Démon | `enemy-demon` (rouge sombre) | 130 | 35 | 5 | 8–10 | 700 | 720 | 7 |
+| Vampire | `enemy-vampire` (violet/noir) | 150 | 42 | 5 | 8–10 | 900 | 950 | 8 |
+| Golem de Pierre | `enemy-golem` (gris ardoise) | 170 | 50 | 5 | 9–10 | 1100 | 1200 | 9 |
+| Nécromancien | `enemy-necromancien` (noir/vert) | 195 | 58 | 6 | 9–10 | 1350 | 1500 | 10 |
+| Hydre | `enemy-hydre` (vert/teal) | 220 | 66 | 6 | 10 | 1600 | 1800 | 11 |
+| Chimère | `enemy-chimere` (orange) | 245 | 74 | 6 | 10 | 1900 | 2200 | 12 |
+| Sorcière Noire | `enemy-sorciere-noire` (noir/vert) | 275 | 85 | 6 | 10 | 2200 | 2700 | 13 |
+| Ange Déchu | `enemy-ange-dechu` (blanc corrompu) | 310 | 98 | 7 | 10 | 2600 | 3300 | 14 |
+| Titan de Feu | `enemy-titan-feu` (orange/rouge) | 360 | 115 | 7 | 10 | 3100 | 4000 | 15 |
+| Archidémon | `enemy-archidemon` (rouge sang) | 420 | 140 | 7 | 10 | 3700 | 4900 | 16 |
+| Dieu de la Mort | `enemy-dieu-mort` (noir/or) | 500 | 170 | 8 | 10 | 4500 | 6000 | 17 |
 
 ### Types de boss
 
@@ -136,7 +146,17 @@ Le niveau est affiché dans le HUD (`NIV:X`, en bas à gauche). Un level up déc
 | 4 | 40% Squelette · 60% Chevalier Noir |
 | 5 | 30% Chevalier Noir · 70% Ogre |
 | 6 | 40% Ogre · 60% Liche |
-| 7+ | 40% Liche · 60% Démon |
+| 7 | 40% Liche · 60% Démon |
+| 8 | 40% Démon · 60% Vampire |
+| 9 | 40% Vampire · 60% Golem de Pierre |
+| 10 | 40% Golem · 60% Nécromancien |
+| 11 | 40% Nécromancien · 60% Hydre |
+| 12 | 40% Hydre · 60% Chimère |
+| 13 | 40% Chimère · 60% Sorcière Noire |
+| 14 | 40% Sorcière Noire · 60% Ange Déchu |
+| 15 | 40% Ange Déchu · 60% Titan de Feu |
+| 16 | 40% Titan de Feu · 60% Archidémon |
+| 17+ | 40% Archidémon · 60% Dieu de la Mort |
 
 ### Déroulement d'un combat (QuizScene)
 
@@ -227,7 +247,7 @@ npm run preview  # Preview build
 - Génération procédurale du donjon
 - Player top-down 4 directions avec HP persistant
 - Système de combat RPG tour par tour (multi-rounds)
-- 7 types d'ennemis normaux + 3 boss avec sprites procéduraux distincts
+- 17 types d'ennemis normaux + 3 boss avec sprites procéduraux distincts
 - Système de niveau XP : battre des monstres rapporte de l'XP, level up débloque de nouveaux ennemis
 - Dégâts liés à la rapidité (critique/bon coup/normal/faible/raté)
 - Animations de combat (attaque, riposte, flash, shake, texte flottant)
@@ -243,7 +263,7 @@ npm run preview  # Preview build
 
 ### À Tester 🧪
 - Équilibrage des seuils XP et de la progression de niveau
-- Playtest complet du flow de combat avec les 7 types d'ennemis
+- Playtest complet du flow de combat avec les 17 types d'ennemis
 - Edge cases (rounds épuisés sans vaincre l'ennemi, potions à HP max)
 
 ### Améliorations Futures 💡

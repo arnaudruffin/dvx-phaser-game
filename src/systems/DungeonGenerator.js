@@ -189,6 +189,16 @@ export class DungeonGenerator {
         if (level === 4) return roll < 0.4 ? 'squelette' : 'chevalier-noir';
         if (level === 5) return roll < 0.3 ? 'chevalier-noir' : 'ogre';
         if (level === 6) return roll < 0.4 ? 'ogre' : 'liche';
-        return roll < 0.4 ? 'liche' : 'demon';
+        if (level === 7) return roll < 0.4 ? 'liche' : 'demon';
+        if (level === 8) return roll < 0.4 ? 'demon' : 'vampire';
+        if (level === 9) return roll < 0.4 ? 'vampire' : 'golem';
+        if (level === 10) return roll < 0.4 ? 'golem' : 'necromancien';
+        if (level === 11) return roll < 0.4 ? 'necromancien' : 'hydre';
+        if (level === 12) return roll < 0.4 ? 'hydre' : 'chimere';
+        if (level === 13) return roll < 0.4 ? 'chimere' : 'sorciere-noire';
+        if (level === 14) return roll < 0.4 ? 'sorciere-noire' : 'ange-dechu';
+        if (level === 15) return roll < 0.4 ? 'ange-dechu' : 'titan-feu';
+        if (level === 16) return roll < 0.4 ? 'titan-feu' : 'archidemon';
+        return roll < 0.4 ? 'archidemon' : 'dieu-mort';
     }
 }
