@@ -6,13 +6,13 @@
 
 ### Concept
 - Le joueur explore un donjon généré procéduralement (vue top-down)
-- Chaque salle contient des monstres de 3 types (Gobelin, Squelette, Ogre)
+- Chaque salle contient des monstres de 7 types (Gobelin → Démon)
 - Toucher un monstre déclenche un **combat RPG tour par tour**
 - Chaque round : une multiplication → le joueur attaque → l'ennemi riposte
 - Plus la réponse est rapide, plus le coup est puissant (CRITIQUE! → FAIBLE)
 - Mauvaise réponse = 0 dégâts + l'ennemi fait double dégâts
 - HP joueur persistant entre combats, potions de soin dans le donjon
-- Difficulté progressive : ennemis plus forts loin du spawn
+- Difficulté progressive : battre des monstres rapporte de l'XP → level up → monstres plus forts
 - Exploration infinie avec score croissant
 
 ### Stack Technique
@@ -33,13 +33,14 @@ src/
 │   ├── MenuScene.js        # Écran titre
 │   ├── GameScene.js        # Gameplay principal (donjon + player + potions)
 │   ├── QuizScene.js        # Scène de combat RPG tour par tour
-│   ├── HudScene.js         # Score, barre de vie, indicateur de salle
+│   ├── HudScene.js         # Score, barre de vie, niveau joueur
 │   └── GameOverScene.js    # Score final + restart
 ├── gameobjects/
 │   ├── Player.js           # Héros contrôlable (4 directions, HP persistant)
-│   └── Enemy.js            # Monstres avec 3 types (Gobelin/Squelette/Ogre)
+│   └── Enemy.js            # Monstres avec 10 types (7 normaux + 3 boss)
 └── systems/
     ├── DungeonGenerator.js # Génération procédurale (salles, ennemis, potions)
+    ├── LevelManager.js     # Système XP → niveau joueur
     ├── QuizManager.js      # Logique multiplications + calcul dégâts
     └── ScoreManager.js     # Gestion du score
 ```
@@ -74,25 +75,68 @@ Le `DungeonGenerator` crée des salles connectées à la demande :
 - Chaque salle a 4 portes (N/S/E/O) pour exploration infinie
 - Obstacles intérieurs aléatoires (blocs 1x1 ou 2x2)
 - 1-3 ennemis par salle (sauf salle de départ)
-- Type d'ennemi selon la distance au spawn (`pickEnemyType`) :
-  - Distance 1-2 : Gobelins uniquement
-  - Distance 3-4 : Gobelins (40%) + Squelettes (60%)
-  - Distance 5-6 : Squelettes (40%) + Ogres (60%)
-  - Distance 7+ : Ogres (70%) + Squelettes (30%)
-- 0-1 potion de soin par salle (~30% de chance)
+- Type d'ennemi selon le **niveau du joueur** (`pickEnemyType(level)`) — voir tableau ci-dessous
+- Salles boss toutes les 5 salles (distance de Manhattan % 5 == 0), 1 boss par salle
+- Type de boss selon le niveau joueur (`pickBossType(level)`)
+- 0-1 potion de soin par salle (~30% de chance, pas dans les salles boss)
 - Les salles sont mises en cache (Map par coordonnées)
+
+---
+
+## Système de Niveau (LevelManager)
+
+L'XP est gagnée en battant des monstres. Quand le seuil est atteint, le niveau monte et les nouvelles salles génèrent des ennemis plus forts.
+
+### Seuils XP cumulatifs
+
+| Niveau | XP total requis |
+|--------|-----------------|
+| 1      | 0               |
+| 2      | 200             |
+| 3      | 500             |
+| 4      | 900             |
+| 5      | 1 400           |
+| 6      | 2 000           |
+| 7      | 2 700           |
+| 8+     | +800 / niveau   |
+
+Le niveau est affiché dans le HUD (`NIV:X`, en bas à gauche). Un level up déclenche une animation "NIVEAU X!" au centre de l'écran.
 
 ---
 
 ## Système de Combat
 
-### Types d'ennemis (`Enemy.ENEMY_TYPES`)
+### Types d'ennemis normaux (`Enemy.ENEMY_TYPES`)
 
-| Type | Texture | HP | Dégâts | Rounds | Tables | Score |
-|------|---------|-----|--------|--------|--------|-------|
-| Gobelin | `enemy-gobelin` (vert) | 30 | 8 | 2 | 1-5 | 100 |
-| Squelette | `enemy-squelette` (blanc) | 50 | 12 | 3 | 3-7 | 200 |
-| Ogre | `enemy-ogre` (rouge) | 80 | 20 | 4 | 5-10 | 350 |
+| Type | Texture | HP | Dégâts | Rounds | Tables | Score | XP | Niveau requis |
+|------|---------|-----|--------|--------|--------|-------|----|---------------|
+| Gobelin | `enemy-gobelin` (vert) | 30 | 8 | 2 | 1–4 | 100 | 80 | 1 |
+| Loup-Garou | `enemy-loup-garou` (marron) | 40 | 10 | 2 | 2–5 | 150 | 130 | 2 |
+| Squelette | `enemy-squelette` (blanc) | 50 | 12 | 3 | 3–6 | 200 | 180 | 3 |
+| Chevalier Noir | `enemy-chevalier-noir` (sombre) | 65 | 16 | 3 | 4–8 | 280 | 280 | 4 |
+| Ogre | `enemy-ogre` (rouge) | 80 | 20 | 4 | 5–9 | 350 | 380 | 5 |
+| Liche | `enemy-liche` (violet) | 100 | 25 | 4 | 6–10 | 500 | 520 | 6 |
+| Démon | `enemy-demon` (rouge sombre) | 130 | 35 | 5 | 8–10 | 700 | 720 | 7 |
+
+### Types de boss
+
+| Type | Texture | HP | Dégâts | Rounds | Tables | Score | XP | Niveau requis |
+|------|---------|-----|--------|--------|--------|-------|----|---------------|
+| Chef Gobelin | `boss-gobelin` | 50 | 15 | 3 | 2–7 | 400 | 500 | 1–2 |
+| Troll des Cavernes | `boss-troll` | 120 | 30 | 5 | 5–10 | 800 | 1000 | 3–5 |
+| Dragon Ancien | `boss-dragon` | 180 | 45 | 6 | 7–10 | 1500 | 2000 | 6+ |
+
+### Pool d'ennemis par niveau joueur
+
+| Niveau | Composition des salles normales |
+|--------|--------------------------------|
+| 1 | 100% Gobelin |
+| 2 | 50% Gobelin · 50% Loup-Garou |
+| 3 | 40% Loup-Garou · 60% Squelette |
+| 4 | 40% Squelette · 60% Chevalier Noir |
+| 5 | 30% Chevalier Noir · 70% Ogre |
+| 6 | 40% Ogre · 60% Liche |
+| 7+ | 40% Liche · 60% Démon |
 
 ### Déroulement d'un combat (QuizScene)
 
@@ -139,7 +183,7 @@ this.scene.launch("QuizScene", {
 
 ### Ajout de Fonctionnalités
 
-1. **Nouveaux types d'ennemis** : Ajouter dans `Enemy.ENEMY_TYPES`, créer sprite dans `Preloader`, ajouter au `pickEnemyType` dans `DungeonGenerator`
+1. **Nouveaux types d'ennemis** : Ajouter dans `Enemy.ENEMY_TYPES` (avec `xpValue`), créer sprite dans `Preloader.generateSprites()`, mettre à jour `pickEnemyType(level)` dans `DungeonGenerator`
 2. **Nouvelles opérations** (division, addition) : Étendre `QuizManager.generateQuestion()`
 3. **Niveaux de difficulté** : Paramétrer `minTable`/`maxTable` dans `Enemy.ENEMY_TYPES`
 4. **Sons** : Utiliser le skill `audio-and-sound`, charger dans Preloader
@@ -152,6 +196,7 @@ this.scene.launch("QuizScene", {
 - **Sprites** : Générés dans `Preloader.generateSprites()`, pas de fichiers PNG
 - **Combat** : QuizScene utilise une machine à états — respecter le flux `intro` → `question` → `player_attack` → `enemy_attack`
 - **Événements** : Communication entre scènes via `this.game.events` (event `"quiz-answer"`)
+- **Niveau joueur** : `LevelManager` tenu à jour dans `GameScene`, `dungeonGenerator.currentLevel` synchronisé à chaque level up. Les salles déjà générées gardent leurs ennemis d'origine (le niveau n'affecte que les nouvelles salles)
 
 ### Skills Phaser Disponibles
 
@@ -175,33 +220,35 @@ npm run preview  # Preview build
 
 ---
 
-## État Actuel (22/04/2026)
+## État Actuel (25/04/2026)
 
 ### Complété ✅
 - Menu principal avec titre
 - Génération procédurale du donjon
 - Player top-down 4 directions avec HP persistant
 - Système de combat RPG tour par tour (multi-rounds)
-- 3 types d'ennemis (Gobelin, Squelette, Ogre) avec sprites distincts
+- 7 types d'ennemis normaux + 3 boss avec sprites procéduraux distincts
+- Système de niveau XP : battre des monstres rapporte de l'XP, level up débloque de nouveaux ennemis
 - Dégâts liés à la rapidité (critique/bon coup/normal/faible/raté)
 - Animations de combat (attaque, riposte, flash, shake, texte flottant)
 - Barre de vie joueur dans le HUD (vert → jaune → rouge)
 - Potions de soin dans le donjon (+25 PV)
-- Difficulté progressive selon la distance au spawn
+- Difficulté progressive selon le niveau joueur
 - Score avec bonus rapidité
-- HUD (score + barre de vie + salle actuelle)
+- HUD (score + barre de vie + niveau joueur NIV:X)
+- Animation "NIVEAU X!" au level up
+- Boss toutes les 5 salles (distance Manhattan), type selon le niveau
 - Game Over avec stats détaillées (score + monstres vaincus)
 - Transitions entre salles
 
 ### À Tester 🧪
-- Équilibrage des dégâts/HP entre types d'ennemis
-- Playtest complet du flow de combat
+- Équilibrage des seuils XP et de la progression de niveau
+- Playtest complet du flow de combat avec les 7 types d'ennemis
 - Edge cases (rounds épuisés sans vaincre l'ennemi, potions à HP max)
 
 ### Améliorations Futures 💡
-- Effets sonores (combat, pickup potion, victoire)
+- Effets sonores (combat, pickup potion, victoire, level up)
 - Animations de marche du player
-- Boss tous les X salles
 - Sauvegarde du meilleur score (localStorage)
 - Mode "révision" avec tables spécifiques
 - Nouveaux types d'opérations (addition, soustraction, division)
