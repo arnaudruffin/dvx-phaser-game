@@ -98,29 +98,29 @@ export class QuizScene extends Scene {
 
         // --- Defense quiz UI (hidden by default) ---
         this.defensePanel = this.add.rectangle(W / 2, H * 0.45, W * 0.6, H * 0.25, 0x2d2d44)
-            .setStrokeStyle(3, 0xff6666).setDepth(5).setAlpha(0);
+            .setStrokeStyle(3, 0xff6666).setDepth(15).setAlpha(0);
 
         this.defenseQuestionText = this.add.bitmapText(W / 2, H * 0.38, "pixelfont", "", 24)
-            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(16).setAlpha(0);
 
         this.defenseAnswerBox = this.add.rectangle(W / 2, H * 0.48, W * 0.25, H * 0.08, 0x1a1a2e)
-            .setStrokeStyle(2, 0xff6666).setDepth(6).setAlpha(0);
+            .setStrokeStyle(2, 0xff6666).setDepth(16).setAlpha(0);
         
         this.defenseAnswerText = this.add.bitmapText(W / 2, H * 0.48, "pixelfont", "_", 36)
-            .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(17).setAlpha(0);
 
         this.defenseInstructionText = this.add.bitmapText(W / 2, H * 0.57, "pixelfont", "REPONDS POUR BLOQUER", 14)
-            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(16).setAlpha(0);
 
         // Defense timer bar (above defensePanel)
         const timerBarY = H * 0.32;
         const timerBarW = W * 0.4;
         this.defenseTimerBg = this.add.rectangle(W / 2, timerBarY, timerBarW, 10, 0x333333)
-            .setOrigin(0.5, 0.5).setDepth(6).setAlpha(0);
+            .setOrigin(0.5, 0.5).setDepth(16).setAlpha(0);
         this.defenseTimerBar = this.add.rectangle(W / 2 - timerBarW / 2, timerBarY, timerBarW, 10, 0xff8800)
-            .setOrigin(0, 0.5).setDepth(7).setAlpha(0);
+            .setOrigin(0, 0.5).setDepth(17).setAlpha(0);
         this.defenseTimerText = this.add.bitmapText(W / 2, timerBarY - 14, "pixelfont", "4", 18)
-            .setOrigin(0.5, 0.5).setDepth(7).setAlpha(0).setTint(0xff8800);
+            .setOrigin(0.5, 0.5).setDepth(17).setAlpha(0).setTint(0xff8800);
 
         // Shield sprite for successful block animation (hidden by default)
         this.shieldSprite = this.add.image(W * 0.2 + 48, H * 0.3, 'shield')
