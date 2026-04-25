@@ -478,13 +478,16 @@ export class QuizScene extends Scene {
         this.defenseAnswerText.setText("_").setAlpha(1);
         this.defenseInstructionText.setAlpha(1);
 
-        // Show and start the 4-second countdown timer
-        const DEFENSE_DURATION = 4000;
+        // Show and start the countdown timer (duration depends on enemy difficulty)
+        const DEFENSE_DURATION = this.enemyConfig.defenseDuration ?? 4000;
         const timerBarW = this.screenW * 0.4;
         this.defenseTimerBar.setDisplaySize(timerBarW, 10);
         this.defenseTimerBg.setAlpha(1);
         this.defenseTimerBar.setAlpha(1);
-        this.defenseTimerText.setText("4").setAlpha(1);
+        const initialSeconds = DEFENSE_DURATION / 1000;
+        this.defenseTimerText.setText(
+            initialSeconds < 2 ? initialSeconds.toFixed(1) : String(Math.ceil(initialSeconds))
+        ).setAlpha(1);
 
         this.defenseBarTween = this.tweens.add({
             targets: this.defenseTimerBar,
@@ -493,8 +496,10 @@ export class QuizScene extends Scene {
             ease: 'Linear',
             onUpdate: () => {
                 if (!this.defenseTimer) return;
-                const remaining = Math.ceil(this.defenseTimer.getRemainingSeconds());
-                this.defenseTimerText.setText(String(remaining));
+                const remaining = this.defenseTimer.getRemainingSeconds();
+                this.defenseTimerText.setText(
+                    DEFENSE_DURATION < 2000 ? remaining.toFixed(1) : String(Math.ceil(remaining))
+                );
                 // Color shift: orange → red as time runs out
                 const ratio = this.defenseTimer.getProgress();
                 this.defenseTimerBar.setFillStyle(ratio > 0.6 ? 0xff8800 : 0xff3300);

@@ -98,7 +98,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 900,
             xpValue: 950,
-            minLevel: 8
+            minLevel: 8,
+            defenseDuration: 3700
         },
         golem: {
             texture: 'enemy-golem',
@@ -110,7 +111,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 1100,
             xpValue: 1200,
-            minLevel: 9
+            minLevel: 9,
+            defenseDuration: 3400
         },
         necromancien: {
             texture: 'enemy-necromancien',
@@ -122,7 +124,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 1350,
             xpValue: 1500,
-            minLevel: 10
+            minLevel: 10,
+            defenseDuration: 3100
         },
         hydre: {
             texture: 'enemy-hydre',
@@ -134,7 +137,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 1600,
             xpValue: 1800,
-            minLevel: 11
+            minLevel: 11,
+            defenseDuration: 2800
         },
         chimere: {
             texture: 'enemy-chimere',
@@ -146,7 +150,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 1900,
             xpValue: 2200,
-            minLevel: 12
+            minLevel: 12,
+            defenseDuration: 2500
         },
         'sorciere-noire': {
             texture: 'enemy-sorciere-noire',
@@ -158,7 +163,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 2200,
             xpValue: 2700,
-            minLevel: 13
+            minLevel: 13,
+            defenseDuration: 2200
         },
         'ange-dechu': {
             texture: 'enemy-ange-dechu',
@@ -170,7 +176,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 2600,
             xpValue: 3300,
-            minLevel: 14
+            minLevel: 14,
+            defenseDuration: 1900
         },
         'titan-feu': {
             texture: 'enemy-titan-feu',
@@ -182,7 +189,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 3100,
             xpValue: 4000,
-            minLevel: 15
+            minLevel: 15,
+            defenseDuration: 1700
         },
         archidemon: {
             texture: 'enemy-archidemon',
@@ -194,7 +202,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 3700,
             xpValue: 4900,
-            minLevel: 16
+            minLevel: 16,
+            defenseDuration: 1500
         },
         'dieu-mort': {
             texture: 'enemy-dieu-mort',
@@ -206,7 +215,8 @@ export class Enemy extends Physics.Arcade.Image {
             maxTable: 10,
             scoreValue: 4500,
             xpValue: 6000,
-            minLevel: 17
+            minLevel: 17,
+            defenseDuration: 500
         },
         'boss-gobelin': {
             texture: 'boss-gobelin',
@@ -232,7 +242,8 @@ export class Enemy extends Physics.Arcade.Image {
             scoreValue: 800,
             xpValue: 1000,
             isBoss: true,
-            minLevel: 3
+            minLevel: 3,
+            defenseDuration: 3000
         },
         'boss-dragon': {
             texture: 'boss-dragon',
@@ -245,7 +256,8 @@ export class Enemy extends Physics.Arcade.Image {
             scoreValue: 1500,
             xpValue: 2000,
             isBoss: true,
-            minLevel: 6
+            minLevel: 6,
+            defenseDuration: 2000
         }
     };
 
