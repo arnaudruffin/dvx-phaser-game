@@ -189,9 +189,7 @@ Machine à états : `intro` → `question` → `player_attack` → `enemy_attack
 | Archidémon | 16 | 140 | 155 | +10.7% |
 | Dieu de la Mort | 17 | 170 | 190 | +11.8% |
 
-**Rounds augmentés** : Ange Déchu (7→8), Titan de Feu (7→8)
-
-**Objectif** : Courbe de difficulté progressive et agressive aux hauts niveaux. Le combo (questions moins triviales + dégâts plus hauts + plus de rounds) force le joueur à répondre correctement sous pression croissante.
+**Objectif** : Courbe de difficulté progressive et agressive aux hauts niveaux. Avec des dégâts ennemis augmentés et des questions plus variées (moins de "10×X"), le joueur doit répondre précisément sous pression croissante.
 
 ### Dégâts liés à la rapidité (`QuizManager.calculateDamage`)
 
