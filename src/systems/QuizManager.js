@@ -15,8 +15,18 @@ export class QuizManager {
             effectiveMax = Math.min(9, this.maxTable);
         }
 
-        const a = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
-        const b = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
+        // Randomly decide which operand is constrained to [minTable, maxTable]
+        // The other operand is free [1..10]
+        const isARestricted = Math.random() < 0.5;
+        
+        let a, b;
+        if (isARestricted) {
+            a = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
+            b = Math.floor(Math.random() * 10) + 1;
+        } else {
+            a = Math.floor(Math.random() * 10) + 1;
+            b = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
+        }
 
         if (this.mode === 'addition') {
             return {
