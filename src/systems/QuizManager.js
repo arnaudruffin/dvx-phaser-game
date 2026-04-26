@@ -6,8 +6,17 @@ export class QuizManager {
     }
 
     generateQuestion() {
-        const a = Math.floor(Math.random() * (this.maxTable - this.minTable + 1)) + this.minTable;
-        const b = Math.floor(Math.random() * (this.maxTable - this.minTable + 1)) + this.minTable;
+        // Filter out 10 randomly (50% of the time) when maxTable >= 10
+        // This increases variety and avoids trivial "10×X" questions
+        let effectiveMax = this.maxTable;
+        let effectiveMin = this.minTable;
+        
+        if (this.maxTable >= 10 && Math.random() < 0.5) {
+            effectiveMax = Math.min(9, this.maxTable);
+        }
+
+        const a = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
+        const b = Math.floor(Math.random() * (effectiveMax - effectiveMin + 1)) + effectiveMin;
 
         if (this.mode === 'addition') {
             return {

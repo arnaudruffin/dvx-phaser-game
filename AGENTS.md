@@ -123,10 +123,10 @@ Le niveau est affiché dans le HUD (`NIV:X`, en bas à gauche). Un level up déc
 | Hydre | `enemy-hydre` (vert/teal) | 220 | 66 | 10 | 1600 | 1800 | 11 |
 | Chimère | `enemy-chimere` (orange) | 245 | 74 | 10 | 1900 | 2200 | 12 |
 | Sorcière Noire | `enemy-sorciere-noire` (noir/vert) | 275 | 85 | 10 | 2200 | 2700 | 13 |
-| Ange Déchu | `enemy-ange-dechu` (blanc corrompu) | 310 | 98 | 10 | 2600 | 3300 | 14 |
-| Titan de Feu | `enemy-titan-feu` (orange/rouge) | 360 | 115 | 10 | 3100 | 4000 | 15 |
-| Archidémon | `enemy-archidemon` (rouge sang) | 420 | 140 | 10 | 3700 | 4900 | 16 |
-| Dieu de la Mort | `enemy-dieu-mort` (noir/or) | 500 | 170 | 10 | 4500 | 6000 | 17 |
+| Ange Déchu | `enemy-ange-dechu` (blanc corrompu) | 310 | 105 | 10 | 2600 | 3300 | 14 |
+| Titan de Feu | `enemy-titan-feu` (orange/rouge) | 360 | 125 | 10 | 3100 | 4000 | 15 |
+| Archidémon | `enemy-archidemon` (rouge sang) | 420 | 155 | 10 | 3700 | 4900 | 16 |
+| Dieu de la Mort | `enemy-dieu-mort` (noir/or) | 500 | 190 | 10 | 4500 | 6000 | 17 |
 
 ### Types de boss
 
@@ -167,6 +167,31 @@ Machine à états : `intro` → `question` → `player_attack` → `enemy_attack
 3. **Attaque joueur** : Dégâts calculés selon rapidité + justesse
 4. **Riposte ennemi** : Dégâts fixes (x2 si le joueur s'est trompé au round précédent)
 5. Retour à l'étape 2 jusqu'à fin des rounds ou HP ≤ 0
+
+### Génération des Questions (Variété & Difficulté)
+
+**Filtrage du 10** : Aux niveaux élevés, les questions générées exclisent aléatoirement le 10 pour augmenter la variété mentale :
+- Si `maxTable ≥ 10` ET `Math.random() < 0.5` → exclure 10 des opérandes (tirer dans [1-9] au lieu de [1-10])
+- Résultat : Questions plus variées (6×7, 5×8, 4×9) au lieu de répétitives (10×1, 10×2, ... 10×10)
+- %  de questions avec 10 : ~19% → ~9.5%
+
+**Exemple** : Liche (tables 1-10)
+- Sans filtre : 19% de "10×X"
+- Avec filtre : 9.5% de "10×X", +50% de questions "complexes mentalement"
+
+### Ajustements de Difficulté (Hauts Niveaux 14-17)
+
+**Dégâts ennemis augmentés** :
+| Ennemi | Niveau | Dégâts ancien | Dégâts nouveau | Augmentation |
+|--------|--------|---------------|----------------|--------------|
+| Ange Déchu | 14 | 98 | 105 | +7% |
+| Titan de Feu | 15 | 115 | 125 | +8.7% |
+| Archidémon | 16 | 140 | 155 | +10.7% |
+| Dieu de la Mort | 17 | 170 | 190 | +11.8% |
+
+**Rounds augmentés** : Ange Déchu (7→8), Titan de Feu (7→8)
+
+**Objectif** : Courbe de difficulté progressive et agressive aux hauts niveaux. Le combo (questions moins triviales + dégâts plus hauts + plus de rounds) force le joueur à répondre correctement sous pression croissante.
 
 ### Dégâts liés à la rapidité (`QuizManager.calculateDamage`)
 
