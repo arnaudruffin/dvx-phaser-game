@@ -2,17 +2,18 @@ import { Scene } from "phaser";
 import { Enemy } from "../gameobjects/Enemy";
 
 const COL = {
-    nom:    { x:  10, w: 130, label: 'NOM' },
-    pv:     { x: 140, w:  40, label: 'PV' },
-    dmg:    { x: 185, w:  40, label: 'DMG' },
-    tables: { x: 230, w:  60, label: 'TABLES' },
-    xp:     { x: 295, w:  55, label: 'XP' },
-    scr:    { x: 355, w:  55, label: 'SCR' },
-    boss:   { x: 415, w:  45, label: 'BOSS' },
-    niv:    { x: 464, w:  40, label: 'NIV' },
+    sprite: { x:  10, w:  36, label: '' },
+    nom:    { x:  50, w: 110, label: 'NOM' },
+    pv:     { x: 165, w:  40, label: 'PV' },
+    dmg:    { x: 210, w:  40, label: 'DMG' },
+    tables: { x: 255, w:  60, label: 'TABLES' },
+    xp:     { x: 320, w:  55, label: 'XP' },
+    scr:    { x: 380, w:  55, label: 'SCR' },
+    boss:   { x: 440, w:  45, label: 'BOSS' },
+    niv:    { x: 489, w:  40, label: 'NIV' },
 };
 
-const ROW_H = 20;
+const ROW_H = 36;
 const FONT_SIZE = 14;
 const HEADER_SIZE = 16;
 
@@ -118,12 +119,14 @@ export class DebugScene extends Scene {
 
         // Column headers
         for (const col of Object.values(COL)) {
-            c.add(this.add.bitmapText(tableX + col.x, startY, 'pixelfont', col.label, HEADER_SIZE)
-                .setTint(0xffcc00));
+            if (col.label) {
+                c.add(this.add.bitmapText(tableX + col.x, startY, 'pixelfont', col.label, HEADER_SIZE)
+                    .setTint(0xffcc00));
+            }
         }
 
         // Header underline
-        c.add(this.add.rectangle(tableX, startY + 14, 504, 2, 0x445566).setOrigin(0, 0.5));
+        c.add(this.add.rectangle(tableX, startY + 14, 534, 2, 0x445566).setOrigin(0, 0.5));
 
         // Separate regular enemies and bosses
         const types = Object.entries(Enemy.ENEMY_TYPES);
@@ -137,7 +140,7 @@ export class DebugScene extends Scene {
         }
 
         // Boss separator
-        c.add(this.add.rectangle(tableX, rowY + 2, 504, 2, 0xff4400, 0.6).setOrigin(0, 0.5));
+        c.add(this.add.rectangle(tableX, rowY + 2, 534, 2, 0xff4400, 0.6).setOrigin(0, 0.5));
         c.add(this.add.bitmapText(tableX + 180, rowY + 8, 'pixelfont', '--- BOSS ---', 14)
             .setTint(0xff6600));
         rowY += 20;
@@ -155,6 +158,17 @@ export class DebugScene extends Scene {
     _addRow(container, tableX, y, cfg, isBoss) {
         const tint = isBoss ? 0xff8844 : 0xdddddd;
 
+        // Add sprite
+        if (cfg.texture) {
+            const spriteX = tableX + COL.sprite.x + 18;
+            const spriteY = y + ROW_H / 2;
+            container.add(
+                this.add.sprite(spriteX, spriteY, cfg.texture)
+                    .setScale(1)
+                    .setOrigin(0.5, 0.5)
+            );
+        }
+
         const cells = [
             { col: 'nom',    text: cfg.name },
             { col: 'pv',     text: String(cfg.maxHp) },
@@ -167,9 +181,11 @@ export class DebugScene extends Scene {
         ];
 
         for (const { col, text } of cells) {
+            const spriteOffset = col === 'nom' ? 8 : 0;
             container.add(
-                this.add.bitmapText(tableX + COL[col].x, y, 'pixelfont', text, FONT_SIZE)
+                this.add.bitmapText(tableX + COL[col].x + spriteOffset, y + 8, 'pixelfont', text, FONT_SIZE)
                     .setTint(col === 'boss' && isBoss ? 0xff4444 : tint)
+                    .setOrigin(0, 0)
             );
         }
 
